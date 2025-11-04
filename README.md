@@ -146,15 +146,28 @@ Ultra-low-friction habit app with **Android-native intelligence**. Users create 
 
 ## Wireframes
 
-*(Add hand-sketched images here in Activity 3.)*
+<img src="wireframes/sketch.png" alt="Activity 3 sketches" width="700" />
+
+* Onboarding 
+<img src="wireframes/login.png" alt="Activity 3 sketches" width="700" />
 
 * Today (list + big “Mark Done”)
-* Add/Edit (type selector → dynamic form)
-* Habit Detail (streak + history)
-* Stats (completion %, longest streak)
-* Settings (quiet hours, permissions)
-* Onboarding (template picker + permission prompts)
+<img src="wireframes/main.png" alt="Activity 3 sketches" width="700" />
 
+* Add/Edit (type selector → dynamic form)
+<img src="wireframes/addedit.png" alt="Activity 3 sketches" width="700" />
+
+* Habit Detail (streak + history)
+<img src="wireframes/habitdetail.gif" alt="Habit detail animation" width="700" />
+
+* Stats (completion %, longest streak)
+<img src="wireframes/stats.gif" alt="Habit detail animation" width="700" />
+
+* Settings (quiet hours, permissions)
+<img src="wireframes/settings.gif" alt="Habit detail animation" width="700" />
+
+Demo walkthrough
+<img src="wireframes/walkthrough.gif" alt="Habit detail animation" width="700" />
 ---
 
 ****

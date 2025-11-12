@@ -229,3 +229,48 @@ Demonstrates complete user flow: onboarding, creating a habit, triggering via mo
 <img src="wireframes/walkthrough.gif" alt="Habit detail animation" width="700" />
 
 ---
+
+# Milestone 2 - Sprint 1 (Core Habit System) (Unit 8)
+
+**Goal:** Build the base architecture, database, and main user flow (CRUD + Today screen).  
+**Due:** End of Unit 8
+
+---
+
+### Setup & Project Infrastructure
+- [x] Initialize Android Studio project (`com.microhabitcoach`)  
+- [x] Set up GitHub repo and README (Milestone 1 complete)  
+- [x] Create GitHub Project Board (To Do / In Progress / Done)  
+- [x] Create three Sprint Milestones (for build weeks)  
+- [x] Define coding conventions and branching strategy  
+
+---
+
+### Core Architecture
+- [ ] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
+- [ ] Create Repository Layer connecting DAO ↔ ViewModel  
+- [ ] Build Habit ViewModel and LiveData for UI binding  
+- [ ] Verify database CRUD operations (unit tests or logs)  
+
+---
+
+### UI / UX Implementation
+- [ ] Build Today Dashboard UI – list of habits (grouped by completion state)  
+- [ ] Add Mark Complete button (one-tap completion with visual feedback)  
+- [ ] Create Add/Edit Habit screen with dynamic form for type selection  
+- [ ] Add Delete Habit function (removes triggers and database entries)  
+- [ ] Implement Navigation Component (Today ↔ Add/Edit ↔ Detail)  
+- [ ] Create placeholder Habit Detail screen (streak and history mock)  
+
+---
+
+### Onboarding / Login Stub
+- [ ] Create basic onboarding screens (Google Sign-In mock optional)  
+- [ ] Add permission prompt stubs for motion and location (contextual UI only)  
+
+---
+
+### Testing & Documentation
+- [ ] Test Add → Display → Complete → Delete flow  
+- [ ] Update README with com
+

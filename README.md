@@ -230,47 +230,15 @@ Demonstrates complete user flow: onboarding, creating a habit, triggering via mo
 
 ---
 
-# Milestone 2 - Sprint 1 (Core Habit System) (Unit 8)
+Milestone 2 - Build Sprint 1 (Unit 8)
+GitHub Project board
+[Add screenshot of your Project Board with three milestones visible in this section] 
 
-**Goal:** Build the base architecture, database, and main user flow (CRUD + Today screen).  
-**Due:** End of Unit 8
+Issue cards
+<img width="344" height="920" alt="image" src="https://github.com/user-attachments/assets/e7e13b2f-cad4-42c6-999b-ad27929acdb7" />
+<img width="1623" height="1168" alt="image" src="https://github.com/user-attachments/assets/2cc0a97a-6be9-43dd-973f-af5ab9b89127" />
 
----
+Issues worked on this sprint
 
-### Setup & Project Infrastructure
-- [x] Initialize Android Studio project (`com.microhabitcoach`)  
-- [x] Set up GitHub repo and README (Milestone 1 complete)  
-- [x] Create GitHub Project Board (To Do / In Progress / Done)  
-- [x] Create three Sprint Milestones (for build weeks)  
-- [x] Define coding conventions and branching strategy  
-
----
-
-### Core Architecture
-- [ ] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
-- [ ] Create Repository Layer connecting DAO ↔ ViewModel  
-- [ ] Build Habit ViewModel and LiveData for UI binding  
-- [ ] Verify database CRUD operations (unit tests or logs)  
-
----
-
-### UI / UX Implementation
-- [ ] Build Today Dashboard UI – list of habits (grouped by completion state)  
-- [ ] Add Mark Complete button (one-tap completion with visual feedback)  
-- [ ] Create Add/Edit Habit screen with dynamic form for type selection  
-- [ ] Add Delete Habit function (removes triggers and database entries)  
-- [ ] Implement Navigation Component (Today ↔ Add/Edit ↔ Detail)  
-- [ ] Create placeholder Habit Detail screen (streak and history mock)  
-
----
-
-### Onboarding / Login Stub
-- [ ] Create basic onboarding screens (Google Sign-In mock optional)  
-- [ ] Add permission prompt stubs for motion and location (contextual UI only)  
-
----
-
-### Testing & Documentation
-- [ ] Test Add → Display → Complete → Delete flow  
-- [ ] Update README with com
+[Add giphy that shows current build progress for Milestone 2. Note: We will be looking for progression of work between Milestone 2 and 3. Make sure your giphys are not duplicated and clearly show the change from Sprint 1 to 2.]
 

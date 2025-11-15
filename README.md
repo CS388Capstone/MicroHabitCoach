@@ -233,6 +233,9 @@ Demonstrates complete user flow: onboarding, creating a habit, triggering via mo
 Milestone 2 - Build Sprint 1 (Unit 8)
 GitHub Project board
 [Add screenshot of your Project Board with three milestones visible in this section] 
+![cs388_milestones](https://github.com/user-attachments/assets/caa20afd-c6e2-412b-b388-4a1fdd74f321)
+
+
 
 Issue cards
 <img width="344" height="920" alt="image" src="https://github.com/user-attachments/assets/e7e13b2f-cad4-42c6-999b-ad27929acdb7" />

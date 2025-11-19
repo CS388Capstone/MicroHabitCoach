@@ -432,7 +432,8 @@ Sprints
 
 
 Progress This Far
-<img width="476" height="363" alt="image" src="https://github.com/user-attachments/assets/2e22e097-a5a0-4e40-a21f-b95b5ba99228" />
+
+https://github.com/user-attachments/assets/5aa53ba3-acaf-44f3-8624-dd64c8896349
 
 
 

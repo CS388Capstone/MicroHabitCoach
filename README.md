@@ -17,20 +17,130 @@
 
 ### Description
 
-Ultra-low-friction habit app with **Android-native intelligence**. Users create habits (unlimited, sane defaults shown). The app uses **Activity Recognition** (movement), **Geofencing** (place-based nudges), and **dynamic notifications** (streak-loss countdown) so tasks happen at the **right time and place**, not just at 9:00 PM. One tap to complete; streaks and history keep you honest.
+**MicroHabit Coach** is a mobile-native behavior engine that solves two critical problems that cause habit-tracking apps to fail:
 
-This application is designed to simplify behavioral change by using intelligent triggers that adapt to the user’s daily routine. Unlike traditional habit trackers that rely exclusively on fixed time reminders, Micro-Habit Coach leverages contextual data such as motion, location, and activity type. Its goal is to create an ecosystem where building small habits becomes automatic and sustainable. The app prioritizes responsiveness, minimal interaction cost, and gentle reinforcement through real-time streak tracking and context-based encouragement.
+1. **Decision Fatigue**: Users don't know what habits to create or how to start. Most apps present a blank slate, forcing users to invent habits from scratch—a cognitive burden that leads to abandonment.
 
-The user interface focuses on clarity and immediacy: every action is one tap away, and notifications are carefully timed to motivate rather than distract. The result is a habit system that feels native to daily life, blending seamlessly with existing routines.
+2. **Lack of Context-Aware Suggestions**: Traditional habit trackers are static. They remind you at fixed times regardless of your location, activity level, or current state. This creates friction when the reminder doesn't match reality (e.g., "Go for a walk" when you're already walking, or "Drink water" when you're nowhere near water).
+
+**Our Solution**: MicroHabit Coach is a mobile-native behavior engine that:
+- **Continuously suggests context-aware habits** from live API feeds (Hacker News/News API), eliminating decision fatigue
+- **Auto-completes habits** when your phone detects you've already done the work (motion detection, geofencing)
+- **Scores suggestions in real-time** based on your location, weather, time of day, and movement state
+- **Converts any suggestion into a trackable habit** with one tap
+
+The app doesn't just track habits—it actively generates, scores, and verifies them using your phone's sensors and contextual data. This is impossible on desktop and requires true mobile-native capabilities.
 
 ### App Evaluation
 
-**Category:** Productivity / Health & Fitness  
-**Mobile:** Very high. Core functionality depends on mobile-native APIs, including **Activity Recognition**, **Geofencing**, and **WorkManager** for background tasks. Optional support for **AppWidgets** allows rapid habit completion from the home screen.  
-**Story:** “It nags you cleverly until you actually do the thing.” Demo highlights adaptive notifications that change based on user context, showcasing motion detection, geofence activation, and streak countdown alerts.  
-**Market:** Broad demographic including students, professionals, and athletes who want structured habit reinforcement without excessive manual tracking.  
-**Habit:** Built for daily engagement. Positive reinforcement (streaks, progress analytics) and negative reinforcement (streak-loss countdown) create habitual use. The app encourages consistency through real-world triggers like movement or arrival at a familiar location.  
-**Scope:** MVP maintains a concise and achievable focus while demonstrating the full range of Android-native capabilities. Key systems include Room database persistence, WorkManager scheduling, background geofence triggers, and in-app data visualization. Additional features such as widgets or cloud sync can be introduced without altering core logic.
+**Category:** Productivity / Health & Fitness
+
+**Mobile:** ⭐⭐⭐⭐⭐ Very High
+
+More than a glorified website: The app fundamentally relies on mobile sensors and background services that cannot exist on desktop.
+
+**Two or more mobile-specific features** (we have **4+**):
+
+1. **Activity Recognition / Motion Detection** (Android ActivityRecognitionClient)
+   - Detects walking, running, stationary states
+   - Auto-completes movement-based habits when thresholds are met
+   - Continuously monitors in background via WorkManager
+
+2. **Geofencing / Location Services** (FusedLocationProviderClient)
+   - Place-based habit triggers (e.g., "Hydrate at Gym" activates when entering gym geofence)
+   - Location-aware FitScore calculation for API suggestions
+   - Low-power background monitoring
+
+3. **Push Notifications / Real-time Alerts** (WorkManager + NotificationManager)
+   - Dynamic streak countdown notifications ("2 hours left to save your streak")
+   - Contextual nudges based on inactivity ("You've been still for 2 hours")
+   - Geofence-triggered reminders
+   - Actionable notification buttons (Mark Done, Snooze)
+
+4. **Real-time Data Updates** (LiveData + Room + Background Services)
+   - Continuous sensor data processing
+   - Real-time habit completion updates
+   - Background API fetching and scoring
+   - Widget updates without app launch
+
+**Story:** ⭐⭐⭐⭐ High
+
+**The Pitch**: "MicroHabit Coach is the only habit app that suggests habits based on your phone's context and auto-completes them when your device detects you've done the work. When you run out of ideas, the app pulls real exercise discussions from Hacker News, analyzes them locally using your location and movement data, and turns them into one-tap habits that sync with your motion and geofence triggers."
+
+**Why it's compelling**:
+- Solves a real, relatable problem (decision fatigue + context mismatch)
+- Demonstrates clear Android-native intelligence (not just a database)
+- Shows technical sophistication (API integration, local classification, sensor fusion)
+- Has a clear demo narrative: "Watch as the app suggests a workout, you tap to create it, and it auto-completes when you start walking"
+
+**Market:** ⭐⭐⭐⭐ Large
+
+**Target Audience**:
+- **Primary**: Students and professionals (18-35) seeking structured habit reinforcement
+- **Secondary**: Fitness enthusiasts and athletes who want context-aware workout suggestions
+- **Tertiary**: Anyone struggling with habit consistency due to decision fatigue
+
+**Market Size**: The productivity/health app market is massive (millions of users), but most apps are generic trackers. Our context-aware, suggestion-driven approach addresses an underserved niche.
+
+**Unique Value**: Unlike generic habit trackers (Habitica, Streaks), we combine:
+- External content discovery (API feeds)
+- Local intelligence (classification, scoring)
+- Sensor-based verification (auto-completion)
+- Context-aware suggestions (location, weather, time, motion)
+
+**Habit:** ⭐⭐⭐⭐ High
+
+**Habit-forming mechanisms**:
+
+1. **Positive Reinforcement**:
+   - Streak counters and visual progress indicators
+   - Completion animations (confetti, color transitions)
+   - Analytics showing consistency metrics
+   - "Best Day of the Week" insights
+
+2. **Negative Reinforcement** (Urgency):
+   - Streak countdown timers ("2 hours left to save your 7-day streak")
+   - Home widget showing incomplete habits
+   - Push notifications with actionable buttons
+
+3. **Reduced Friction**:
+   - One-tap completion
+   - Auto-completion via sensors (no manual logging needed)
+   - Pre-filled habit creation from API suggestions
+   - Context-aware reminders (right time, right place)
+
+4. **Continuous Engagement**:
+   - Daily habit list (Today screen)
+   - Fresh suggestions from API feed (Explore screen)
+   - Real-time updates as habits complete
+   - Weekly/monthly analytics review
+
+**Average user opens app**: Daily (to check Today screen, mark completions, browse suggestions)  
+**Average user creates content**: Regularly (converts API suggestions to habits, creates custom habits)
+
+**Scope:** ⭐⭐⭐⭐⭐ Excellent
+
+**Appropriately technically challenging**:
+- Room database (CRUD operations)
+- Retrofit for API calls (Hacker News/News API)
+- Activity Recognition API integration
+- Geofencing with FusedLocationProviderClient
+- WorkManager for background tasks
+- LiveData/ViewModel architecture
+- Navigation Component
+- Notification system
+- Optional: AppWidget (stretch goal)
+
+**Stripped-down version still interesting**:
+- MVP: Today screen (habits list), Add/Edit habit, basic notifications, simple API feed
+- Even without auto-completion, the suggestion feed + manual tracking is valuable
+- Core value proposition (decision fatigue solution) remains intact
+
+**Product is clearly defined**:
+- Two Stream screens (Today = habits, Explore = API suggestions)
+- Clear navigation flows
+- Well-defined user features (required vs optional)
+- Technical implementation path is clear
 
 ---
 
@@ -48,12 +158,52 @@ The user interface focuses on clarity and immediacy: every action is one tap awa
   * User data and settings are stored locally via Room for speed and privacy, with future compatibility for cloud sync.
   * Contextual setup ensures habits are intelligently categorized (time, movement, or location), reducing user confusion during initial configuration.
 
-* **Today (Mark Complete)**
+* **Today Screen (Stream #1 - Habits List)**
 
   * Displays all habits scheduled or active for the current day, grouped by completion state.
-  * Each habit tile shows its progress bar, time of next reminder, and streak count.
+  * Scrollable list of discrete habit items (Stream archetype).
+  * Each habit card shows:
+    - Habit name and icon
+    - Progress bar/ring
+    - Streak count
+    - Next reminder time
+    - Completion status (checked/unchecked)
   * Users can complete any habit with a single tap, triggering immediate visual feedback such as confetti or color transitions.
-  * Automatic updates ensure accurate reflection of sensor-triggered completions without refreshing the page.
+  * Summary banner at top: "X of Y habits completed today"
+  * Real-time updates as sensor-triggered completions occur (LiveData).
+
+* **Explore Screen (Stream #2 - API Suggestions Feed)**
+
+  * Scrollable stream of habit suggestions from Hacker News API (primary) or News API (backup).
+  * Each suggestion card displays:
+    - Post title and snippet
+    - Source badge (Hacker News/News API)
+    - FitScore (0-100) with visual indicator
+    - Category badge (Fitness, Wellness, Productivity, Learning)
+    - Context indicators (time-appropriate, weather-appropriate, location-appropriate icons)
+    - "Turn into Habit" button
+  * Stream sorted by FitScore (highest relevance first).
+  * Pull-to-refresh to fetch new suggestions.
+  * Tap "Turn into Habit" → opens Creation screen pre-filled with:
+    - Habit name (extracted from post title)
+    - Category (from classification)
+    - Suggested type (Time-based, Motion-based, or Location-based)
+    - Suggested parameters (duration, location, etc.)
+
+* **Habit Classification & FitScore System**
+
+  * **Local classification** (no AI/ML, simple keyword matching in Kotlin):
+    - Parses post title and content for keywords
+    - Categories: Fitness, Wellness, Productivity, Learning, General
+    - Sub-classifications: Indoor/Outdoor, Short/Long duration
+  * **FitScore calculation** (0-100):
+    - Base score: 50
+    - +20 if matches user's preferred categories
+    - +15 if time-appropriate (e.g., "morning workout" at 7am)
+    - +10 if weather-appropriate (e.g., "outdoor run" when sunny)
+    - +5 if location-appropriate (e.g., "gym workout" near gym geofence)
+    - +10 if motion-state matches (e.g., "walk" when user is walking)
+  * Runs entirely on-device (no cloud processing).
 
 * **Scheduled & Dynamic Notifications**
 
@@ -131,12 +281,23 @@ The user interface focuses on clarity and immediacy: every action is one tap awa
   * Permissions for motion and location are requested contextually with justifications for each use.
   * Includes micro-animations and clear progress indicators to maintain engagement during setup.
 
-* **Today (Stream)**
+* **Today (Stream #1)**
 
   * Displays an adaptive list of active habits prioritized by urgency and streak risk.
+  * Scrollable list of discrete habit items (Stream archetype).
   * Uses color-coded progress rings and completion toggles for quick scanning.
   * A summary banner at the top shows total habits completed and time remaining to preserve streaks.
   * Background service continuously updates this list based on motion and geofence triggers.
+  * Real-time updates via LiveData as sensor-triggered completions occur.
+
+* **Explore (Stream #2)**
+
+  * Scrollable stream of API suggestions (Stream archetype).
+  * Each suggestion is a discrete item with title, FitScore, category, and action button.
+  * Sorted by FitScore (highest relevance first).
+  * Pull-to-refresh to fetch new suggestions from Hacker News/News API.
+  * Mobile-native: Uses location, weather, time, and motion state to calculate FitScore in real-time.
+  * "Turn into Habit" button opens Creation screen with pre-filled data.
 
 * **Add / Edit Habit (Creation)**
 
@@ -172,25 +333,51 @@ The user interface focuses on clarity and immediacy: every action is one tap awa
 
 #### Tab Navigation (Tab to Screen)
 
-* **Today**
-* **Add** (or FAB if using 3 tabs)
-* **Stats**
-* **Settings** *(can live under Stats overflow if 3 tabs)*
+* **Today** → Today Screen (Stream #1 - Habits List)
+* **Explore** → Explore Screen (Stream #2 - API Suggestions Feed)
+* **Stats** → Profile/Stats Screen
+* **Settings** → Settings Screen
 
 #### Flow Navigation (Screen to Screen)
 
 * **Login/Onboarding → Today**  
-  Directs new users to their first-day dashboard after initial setup.  
+  Directs new users to their first-day dashboard after initial setup.
+
 * **Today → Habit Detail**  
-  Opens detailed progress view of a selected habit.  
+  Opens detailed progress view of a selected habit (tap on habit card).
+
 * **Today → Add/Edit Habit**  
-  Launches creation flow; returning automatically updates the Today list.  
-* **Habit Detail → Edit Habit**  
-  Preserves data context for immediate modifications.  
-* **Stats → Habit Detail**  
-  Enables users to explore analytics behind any habit summary metric.  
-* **Settings → System permission screens** (Notifications/Activity/Location)  
-  Opens Android system dialogs for adjusting key permissions when needed.
+  Launches creation flow via FAB or "Add Habit" button; returning automatically updates the Today list.
+
+* **Today → Explore**  
+  Navigate via tab navigation to browse API suggestions.
+
+* **Explore → Add/Edit Habit**  
+  Tap "Turn into Habit" button on any suggestion card; opens Creation screen with pre-filled data (name, category, type, parameters).
+
+* **Explore → Today**  
+  Navigate via tab navigation to return to habits list.
+
+* **Habit Detail → Add/Edit Habit**  
+  Tap Edit button; preserves data context for immediate modifications.
+
+* **Habit Detail → Today**  
+  Back button or navigation returns to Today screen.
+
+* **Add/Edit Habit → Today**  
+  After saving, returns to Today screen and updates the list.
+
+* **Add/Edit Habit → Habit Detail**  
+  If editing existing habit, can navigate to detail view.
+
+* **Profile/Stats → Habit Detail**  
+  Tap on any habit metric to see detailed analytics for that habit.
+
+* **Profile/Stats → Settings**  
+  Navigate via tab navigation or overflow menu.
+
+* **Settings → System Permission Screens**  
+  Opens Android system dialogs for adjusting key permissions (Notifications, Activity Recognition, Location).
 
 Navigation emphasizes logical flow with minimal friction. Transitions between screens use smooth animations to maintain focus and continuity. The design prioritizes clarity, ensuring that users always understand where they are and how to return to the main dashboard.
 
@@ -230,18 +417,47 @@ Demonstrates complete user flow: onboarding, creating a habit, triggering via mo
 
 ---
 
-Milestone 2 - Build Sprint 1 (Unit 8)
-GitHub Project board
-[Add screenshot of your Project Board with three milestones visible in this section] 
-![cs388_milestones](https://github.com/user-attachments/assets/caa20afd-c6e2-412b-b388-4a1fdd74f321)
+# Milestone 2 - Sprint 1 (Core Habit System) (Unit 8)
 
+**Goal:** Build the base architecture, database, and main user flow (CRUD + Today screen).  
+**Due:** End of Unit 8
 
+---
 
-Issue cards
-<img width="344" height="920" alt="image" src="https://github.com/user-attachments/assets/e7e13b2f-cad4-42c6-999b-ad27929acdb7" />
-<img width="1623" height="1168" alt="image" src="https://github.com/user-attachments/assets/2cc0a97a-6be9-43dd-973f-af5ab9b89127" />
+### Setup & Project Infrastructure
+- [x] Initialize Android Studio project (`com.microhabitcoach`)  
+- [x] Set up GitHub repo and README (Milestone 1 complete)  
+- [x] Create GitHub Project Board (To Do / In Progress / Done)  
+- [x] Create three Sprint Milestones (for build weeks)  
+- [x] Define coding conventions and branching strategy  
 
-Issues worked on this sprint
+---
 
-[Add giphy that shows current build progress for Milestone 2. Note: We will be looking for progression of work between Milestone 2 and 3. Make sure your giphys are not duplicated and clearly show the change from Sprint 1 to 2.]
+### Core Architecture
+- [ ] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
+- [ ] Create Repository Layer connecting DAO ↔ ViewModel  
+- [ ] Build Habit ViewModel and LiveData for UI binding  
+- [ ] Verify database CRUD operations (unit tests or logs)  
+
+---
+
+### UI / UX Implementation
+- [ ] Build Today Dashboard UI – list of habits (grouped by completion state)  
+- [ ] Add Mark Complete button (one-tap completion with visual feedback)  
+- [ ] Create Add/Edit Habit screen with dynamic form for type selection  
+- [ ] Add Delete Habit function (removes triggers and database entries)  
+- [ ] Implement Navigation Component (Today ↔ Add/Edit ↔ Detail)  
+- [ ] Create placeholder Habit Detail screen (streak and history mock)  
+
+---
+
+### Onboarding / Login Stub
+- [ ] Create basic onboarding screens (Google Sign-In mock optional)  
+- [ ] Add permission prompt stubs for motion and location (contextual UI only)  
+
+---
+
+### Testing & Documentation
+- [ ] Test Add → Display → Complete → Delete flow  
+- [ ] Update README with com
 

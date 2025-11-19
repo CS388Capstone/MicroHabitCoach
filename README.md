@@ -419,6 +419,19 @@ Demonstrates complete user flow: onboarding, creating a habit, triggering via mo
 
 # Milestone 2 - Sprint 1 (Core Habit System) (Unit 8)
 
+<img width="1305" height="1178" alt="image" src="https://github.com/user-attachments/assets/89ecb1b7-fbe0-4b55-8e8d-997042680a1c" />
+This Unit's Progress
+
+Sprints
+
+<img width="1169" height="870" alt="image" src="https://github.com/user-attachments/assets/4f1fe83c-6f72-4cef-9c40-1fd9221ef379" />
+
+<img width="1211" height="876" alt="image" src="https://github.com/user-attachments/assets/40341d6f-5dd9-458f-821d-482967a74ad4" />
+
+<img width="1157" height="881" alt="image" src="https://github.com/user-attachments/assets/d1dabe74-d24b-4d1e-a787-adbc9bc1c3c4" />
+
+
+
 **Goal:** Build the base architecture, database, and main user flow (CRUD + Today screen).  
 **Due:** End of Unit 8
 

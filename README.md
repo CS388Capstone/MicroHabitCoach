@@ -431,6 +431,11 @@ Sprints
 <img width="1157" height="881" alt="image" src="https://github.com/user-attachments/assets/d1dabe74-d24b-4d1e-a787-adbc9bc1c3c4" />
 
 
+Progress This Far
+<img width="476" height="363" alt="image" src="https://github.com/user-attachments/assets/2e22e097-a5a0-4e40-a21f-b95b5ba99228" />
+
+
+
 
 **Goal:** Build the base architecture, database, and main user flow (CRUD + Today screen).  
 **Due:** End of Unit 8
@@ -447,14 +452,15 @@ Sprints
 ---
 
 ### Core Architecture
-- [ ] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
-- [ ] Create Repository Layer connecting DAO ↔ ViewModel  
+- [X] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
+- [X] Create Repository Layer connecting DAO ↔ ViewModel  
 - [ ] Build Habit ViewModel and LiveData for UI binding  
 - [ ] Verify database CRUD operations (unit tests or logs)  
 
 ---
 
 ### UI / UX Implementation
+- [X] Set up base view of the app
 - [ ] Build Today Dashboard UI – list of habits (grouped by completion state)  
 - [ ] Add Mark Complete button (one-tap completion with visual feedback)  
 - [ ] Create Add/Edit Habit screen with dynamic form for type selection  

@@ -157,7 +157,7 @@
 - Create account (email or Google Sign-In)
 - Choose from smart templates during onboarding:
   - *Hydrate at Gym* (geofence-based)
-  - *Move Break* (motion-based)
+  - *Move Break* (motion-based)if 
   - *Walk 10 min* (motion-based)
   - *Read 10 pages* (time-based)
   - *Stretch at Home* (geofence-based)
@@ -663,3 +663,8 @@ fun calculateFitScore(
 ---
 
 *This plan fulfills all Unit 7 requirements and provides a clear roadmap for implementation.*
+
+
+**Come up with a few scenarios, how does this get interact with the hacker news prompt etc.
+** wants to see database schema - whatever we decide, have some scenarios, i am this user and im in this situation 
+** try to connect to api, some data coming in

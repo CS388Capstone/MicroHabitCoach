@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MicroHabitCoach" parent="Theme.Material3.DayNight">
+        <!-- Material3 uses colorPrimary, colorOnPrimary automatically -->
+    </style>
+</resources>
+

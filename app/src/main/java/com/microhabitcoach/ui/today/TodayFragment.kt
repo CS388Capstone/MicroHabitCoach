@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.microhabitcoach.R
 import com.microhabitcoach.data.database.entity.Habit
 import com.microhabitcoach.databinding.FragmentTodayBinding
+import com.microhabitcoach.ui.today.HabitWithCompletion
 
 class TodayFragment : Fragment() {
 
@@ -40,6 +41,7 @@ class TodayFragment : Fragment() {
 
         setupRecyclerView()
         setupFab()
+        setupPullToRefresh()
         observeViewModel()
         viewModel.loadHabits()
     }
@@ -48,6 +50,7 @@ class TodayFragment : Fragment() {
         adapter = HabitItemAdapter(
             onCompleteClick = { habit ->
                 viewModel.completeHabit(habit.id)
+                showCompletionFeedback(habit.name)
             },
             onEditClick = { habit ->
                 navigateToEditHabit(habit.id)
@@ -70,6 +73,12 @@ class TodayFragment : Fragment() {
         }
     }
 
+    private fun setupPullToRefresh() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.loadHabits()
+        }
+    }
+
     private fun observeViewModel() {
         viewModel.habits.observe(viewLifecycleOwner) { habits ->
             adapter.submitList(habits)
@@ -80,6 +89,7 @@ class TodayFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.isVisible = isLoading
+            binding.swipeRefreshLayout.isRefreshing = isLoading
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -90,10 +100,18 @@ class TodayFragment : Fragment() {
         }
     }
 
-    private fun updateSummary(habits: List<Habit>) {
-        val completedCount = 0 // TODO: Calculate based on today's completions
+    private fun updateSummary(habits: List<HabitWithCompletion>) {
+        val completedCount = habits.count { it.isCompletedToday }
         val totalCount = habits.size
         binding.tvSummary.text = getString(R.string.habits_summary_format, completedCount, totalCount)
+    }
+
+    private fun showCompletionFeedback(habitName: String) {
+        Snackbar.make(
+            binding.root,
+            getString(R.string.habit_completed_message, habitName),
+            Snackbar.LENGTH_SHORT
+        ).show()
     }
 
     private fun showDeleteConfirmation(habit: Habit) {

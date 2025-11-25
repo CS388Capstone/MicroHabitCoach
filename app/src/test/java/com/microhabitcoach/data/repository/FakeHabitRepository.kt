@@ -30,6 +30,16 @@ class FakeHabitRepository : HabitRepository {
         emitSnapshot()
     }
 
+    override suspend fun deleteHabit(id: String) {
+        habitStore.remove(id)
+        emitSnapshot()
+    }
+
+    override suspend fun isHabitCompletedToday(habitId: String): Boolean {
+        // For tests, always return false (can be customized if needed)
+        return false
+    }
+
     suspend fun seedHabits(habits: List<Habit>) {
         habitStore.clear()
         habits.forEach { habitStore[it.id] = it }

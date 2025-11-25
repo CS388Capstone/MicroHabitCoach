@@ -39,7 +39,7 @@ class TodayViewModelTest {
 
         val habits = viewModel.habits.getOrAwaitValue()
         assertEquals(1, habits.size)
-        assertEquals("Habit-1", habits.first().id)
+        assertEquals("Habit-1", habits.first().habit.id)
     }
 
     @Test

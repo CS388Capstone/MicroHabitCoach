@@ -65,5 +65,9 @@
     <string name="confirm">Confirm</string>
     <string name="habit_deleted">Habit deleted</string>
     <string name="habit_completed">Habit completed!</string>
+    <string name="habit_completed_message">%1$s completed! 🔥</string>
+    <string name="habit_icon">Habit icon</string>
+    <string name="next_reminder">Next: %1$s</string>
+    <string name="no_reminder">No reminders</string>
 </resources>
 

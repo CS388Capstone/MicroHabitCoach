@@ -11,6 +11,8 @@ import com.microhabitcoach.data.database.entity.Habit
 import com.microhabitcoach.data.repository.DefaultHabitRepository
 import com.microhabitcoach.data.repository.HabitRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -20,8 +22,8 @@ class TodayViewModel(
     private val repository: HabitRepository = DefaultHabitRepository(application)
 ) : AndroidViewModel(application) {
 
-    private val _habits = MutableLiveData<List<Habit>>(emptyList())
-    val habits: LiveData<List<Habit>> = _habits
+    private val _habits = MutableLiveData<List<HabitWithCompletion>>(emptyList())
+    val habits: LiveData<List<HabitWithCompletion>> = _habits
 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
@@ -41,7 +43,16 @@ class TodayViewModel(
                     _isLoading.value = false
                 }
                 .collect { list ->
-                    _habits.value = list
+                    // Check completion status for each habit in parallel
+                    val habitsWithCompletion = list.map { habit ->
+                        async {
+                            val isCompleted = repository.isHabitCompletedToday(habit.id)
+                            HabitWithCompletion(habit, isCompleted)
+                        }
+                    }.awaitAll()
+                    // Sort: incomplete first, completed below
+                    val sorted = habitsWithCompletion.sortedBy { it.isCompletedToday }
+                    _habits.value = sorted
                     _isLoading.value = false
                 }
         }
@@ -51,9 +62,23 @@ class TodayViewModel(
         viewModelScope.launch {
             try {
                 repository.completeHabit(habitId)
+                // Refresh habits to update completion status
+                refreshHabitsCompletionStatus()
             } catch (t: Throwable) {
                 _error.value = t.message ?: "Failed to complete habit"
             }
+        }
+    }
+
+    private suspend fun refreshHabitsCompletionStatus() {
+        val currentHabits = _habits.value
+        if (currentHabits != null) {
+            val updated = currentHabits.map { habitWithCompletion ->
+                val isCompleted = repository.isHabitCompletedToday(habitWithCompletion.habit.id)
+                HabitWithCompletion(habitWithCompletion.habit, isCompleted)
+            }
+            val sorted = updated.sortedBy { it.isCompletedToday }
+            _habits.value = sorted
         }
     }
 

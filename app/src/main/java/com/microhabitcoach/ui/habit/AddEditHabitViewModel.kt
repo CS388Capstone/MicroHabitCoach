@@ -115,6 +115,20 @@ class AddEditHabitViewModel(
         }
     }
 
+    fun deleteHabit(id: String) {
+        viewModelScope.launch {
+            try {
+                _saveState.value = SaveState.Saving
+                repository.deleteHabit(id)
+                _habit.value = null
+                _saveState.value = SaveState.Success
+            } catch (t: Throwable) {
+                _saveState.value = SaveState.Error(t.message ?: "Failed to delete habit")
+                _error.value = t.message
+            }
+        }
+    }
+
     data class ValidationResult(val isValid: Boolean, val errors: List<String>)
 
     sealed class FormState {

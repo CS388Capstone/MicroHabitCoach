@@ -11,6 +11,7 @@ interface HabitRepository {
     suspend fun getHabitById(id: String): Habit?
     suspend fun saveHabit(habit: Habit)
     suspend fun completeHabit(habitId: String)
+    suspend fun deleteHabit(id: String)
 }
 
 class DefaultHabitRepository(
@@ -34,5 +35,9 @@ class DefaultHabitRepository(
             updatedAt = System.currentTimeMillis()
         )
         habitDao.updateHabit(updatedHabit)
+    }
+
+    override suspend fun deleteHabit(id: String) {
+        habitDao.deleteHabitById(id)
     }
 }

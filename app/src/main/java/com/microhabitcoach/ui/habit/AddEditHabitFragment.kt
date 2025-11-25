@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.chip.Chip
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.microhabitcoach.R
 import com.microhabitcoach.data.database.entity.Habit
@@ -178,6 +179,7 @@ class AddEditHabitFragment : Fragment() {
     private fun setupActions() = with(binding) {
         btnCancel.setOnClickListener { findNavController().popBackStack() }
         btnSave.setOnClickListener { attemptSave() }
+        btnDelete.setOnClickListener { attemptDelete() }
     }
 
     private fun observeViewModel() {
@@ -196,17 +198,30 @@ class AddEditHabitFragment : Fragment() {
         }
         viewModel.saveState.observe(viewLifecycleOwner) { state ->
             when (state) {
-                SaveState.Saving -> binding.btnSave.isEnabled = false
+                SaveState.Saving -> {
+                    binding.btnSave.isEnabled = false
+                    binding.btnDelete.isEnabled = false
+                }
                 SaveState.Success -> {
                     binding.btnSave.isEnabled = true
-                    Snackbar.make(binding.root, R.string.habit_saved, Snackbar.LENGTH_SHORT).show()
+                    binding.btnDelete.isEnabled = true
+                    val message = if (viewModel.habit.value != null) {
+                        R.string.habit_deleted
+                    } else {
+                        R.string.habit_saved
+                    }
+                    Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                     findNavController().popBackStack()
                 }
                 is SaveState.Error -> {
                     binding.btnSave.isEnabled = true
+                    binding.btnDelete.isEnabled = true
                     showError(state.message)
                 }
-                else -> binding.btnSave.isEnabled = true
+                else -> {
+                    binding.btnSave.isEnabled = true
+                    binding.btnDelete.isEnabled = true
+                }
             }
         }
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -218,8 +233,10 @@ class AddEditHabitFragment : Fragment() {
         val habitId = args.habitId
         if (!habitId.isNullOrBlank()) {
             binding.tvTitle.text = getString(R.string.edit_habit)
+            binding.btnDelete.isVisible = true
             viewModel.loadHabit(habitId)
         } else {
+            binding.btnDelete.isVisible = false
             args.suggestionName?.takeIf { it.isNotBlank() }?.let {
                 binding.etHabitName.setText(it)
             }
@@ -411,6 +428,20 @@ class AddEditHabitFragment : Fragment() {
 
     private fun HabitCategory.displayName(): String =
         name.lowercase().replaceFirstChar { it.uppercase() }
+
+    private fun attemptDelete() {
+        val habitId = args.habitId
+        if (habitId.isNullOrBlank()) return
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.delete_habit)
+            .setMessage(R.string.delete_habit_confirmation)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                viewModel.deleteHabit(habitId)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
 
     private fun showError(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()

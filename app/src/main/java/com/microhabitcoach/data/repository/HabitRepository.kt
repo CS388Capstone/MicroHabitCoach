@@ -4,15 +4,35 @@ import android.content.Context
 import com.microhabitcoach.data.database.DatabaseModule
 import com.microhabitcoach.data.database.dao.HabitDao
 import com.microhabitcoach.data.database.entity.Habit
+import kotlinx.coroutines.flow.Flow
 
-class HabitRepository(context: Context) {
-
-    private val habitDao: HabitDao = DatabaseModule.getDatabase(context).habitDao()
-
-    suspend fun getHabitById(id: String): Habit? = habitDao.getHabitById(id)
-
-    suspend fun insertHabit(habit: Habit) = habitDao.insertHabit(habit)
-
-    suspend fun updateHabit(habit: Habit) = habitDao.updateHabit(habit)
+interface HabitRepository {
+    fun observeHabits(): Flow<List<Habit>>
+    suspend fun getHabitById(id: String): Habit?
+    suspend fun saveHabit(habit: Habit)
+    suspend fun completeHabit(habitId: String)
 }
 
+class DefaultHabitRepository(
+    private val habitDao: HabitDao
+) : HabitRepository {
+
+    constructor(context: Context) : this(DatabaseModule.getDatabase(context).habitDao())
+
+    override fun observeHabits(): Flow<List<Habit>> = habitDao.getAllHabits()
+
+    override suspend fun getHabitById(id: String): Habit? = habitDao.getHabitById(id)
+
+    override suspend fun saveHabit(habit: Habit) {
+        habitDao.insertHabit(habit)
+    }
+
+    override suspend fun completeHabit(habitId: String) {
+        val habit = habitDao.getHabitById(habitId) ?: return
+        val updatedHabit = habit.copy(
+            streakCount = habit.streakCount + 1,
+            updatedAt = System.currentTimeMillis()
+        )
+        habitDao.updateHabit(updatedHabit)
+    }
+}

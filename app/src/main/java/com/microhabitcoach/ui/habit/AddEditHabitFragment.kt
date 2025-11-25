@@ -21,6 +21,8 @@ import com.microhabitcoach.data.model.HabitCategory
 import com.microhabitcoach.data.model.HabitType
 import com.microhabitcoach.data.model.LocationData
 import com.microhabitcoach.databinding.FragmentAddEditHabitBinding
+import com.microhabitcoach.ui.habit.AddEditHabitViewModel.FormState
+import com.microhabitcoach.ui.habit.AddEditHabitViewModel.SaveState
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -30,7 +32,9 @@ class AddEditHabitFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args: AddEditHabitFragmentArgs by navArgs()
-    private val viewModel: AddEditHabitViewModel by viewModels()
+    private val viewModel: AddEditHabitViewModel by viewModels {
+        AddEditHabitViewModel.Factory(requireActivity().application)
+    }
 
     private val reminderTimes = mutableListOf<LocalTime>()
     private val selectedDays = mutableSetOf<Int>()
@@ -180,14 +184,29 @@ class AddEditHabitFragment : Fragment() {
         viewModel.habit.observe(viewLifecycleOwner) { habit ->
             habit?.let { populateForm(it) }
         }
+        viewModel.formState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                FormState.Loading -> binding.btnSave.isEnabled = false
+                is FormState.Error -> {
+                    binding.btnSave.isEnabled = true
+                    showError(state.message)
+                }
+                else -> binding.btnSave.isEnabled = true
+            }
+        }
         viewModel.saveState.observe(viewLifecycleOwner) { state ->
-            state?.let {
-                if (it.success) {
+            when (state) {
+                SaveState.Saving -> binding.btnSave.isEnabled = false
+                SaveState.Success -> {
+                    binding.btnSave.isEnabled = true
                     Snackbar.make(binding.root, R.string.habit_saved, Snackbar.LENGTH_SHORT).show()
                     findNavController().popBackStack()
-                } else if (!it.success && it.message != null) {
-                    showError(it.message)
                 }
+                is SaveState.Error -> {
+                    binding.btnSave.isEnabled = true
+                    showError(state.message)
+                }
+                else -> binding.btnSave.isEnabled = true
             }
         }
         viewModel.error.observe(viewLifecycleOwner) { error ->

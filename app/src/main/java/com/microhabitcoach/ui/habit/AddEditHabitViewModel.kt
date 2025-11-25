@@ -4,25 +4,32 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.microhabitcoach.data.database.entity.Habit
 import com.microhabitcoach.data.model.HabitCategory
 import com.microhabitcoach.data.model.HabitType
 import com.microhabitcoach.data.model.LocationData
+import com.microhabitcoach.data.repository.DefaultHabitRepository
 import com.microhabitcoach.data.repository.HabitRepository
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.util.UUID
 
-class AddEditHabitViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = HabitRepository(application)
+class AddEditHabitViewModel(
+    application: Application,
+    private val repository: HabitRepository = DefaultHabitRepository(application)
+) : AndroidViewModel(application) {
 
     private val _habit = MutableLiveData<Habit?>()
     val habit: LiveData<Habit?> = _habit
 
-    private val _saveState = MutableLiveData<SaveState>()
+    private val _saveState = MutableLiveData<SaveState>(SaveState.Idle)
     val saveState: LiveData<SaveState> = _saveState
+
+    private val _formState = MutableLiveData<FormState>(FormState.Idle)
+    val formState: LiveData<FormState> = _formState
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
@@ -30,8 +37,12 @@ class AddEditHabitViewModel(application: Application) : AndroidViewModel(applica
     fun loadHabit(id: String) {
         viewModelScope.launch {
             try {
-                _habit.value = repository.getHabitById(id)
+                _formState.value = FormState.Loading
+                val result = repository.getHabitById(id)
+                _habit.value = result
+                _formState.value = FormState.Loaded(result)
             } catch (t: Throwable) {
+                _formState.value = FormState.Error(t.message ?: "Failed to load habit")
                 _error.value = t.message
             }
         }
@@ -74,6 +85,7 @@ class AddEditHabitViewModel(application: Application) : AndroidViewModel(applica
     ) {
         viewModelScope.launch {
             try {
+                _saveState.value = SaveState.Saving
                 val now = System.currentTimeMillis()
                 val id = existingHabit?.id ?: UUID.randomUUID().toString()
                 val habit = Habit(
@@ -93,21 +105,47 @@ class AddEditHabitViewModel(application: Application) : AndroidViewModel(applica
                     isActive = existingHabit?.isActive ?: true
                 )
 
-                if (existingHabit == null) {
-                    repository.insertHabit(habit)
-                } else {
-                    repository.updateHabit(habit)
-                }
-
-                _saveState.value = SaveState(success = true, message = null)
+                repository.saveHabit(habit)
+                _habit.value = habit
+                _saveState.value = SaveState.Success
             } catch (t: Throwable) {
-                _saveState.value = SaveState(success = false, message = t.message ?: "Failed to save habit")
+                _saveState.value = SaveState.Error(t.message ?: "Failed to save habit")
+                _error.value = t.message
             }
         }
     }
 
     data class ValidationResult(val isValid: Boolean, val errors: List<String>)
 
-    data class SaveState(val success: Boolean, val message: String?)
+    sealed class FormState {
+        object Idle : FormState()
+        object Loading : FormState()
+        data class Loaded(val habit: Habit?) : FormState()
+        data class Error(val message: String) : FormState()
+    }
+
+    sealed class SaveState {
+        object Idle : SaveState()
+        object Saving : SaveState()
+        object Success : SaveState()
+        data class Error(val message: String) : SaveState()
+    }
+
+    class Factory(
+        private val application: Application,
+        private val repository: HabitRepository? = null
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(AddEditHabitViewModel::class.java)) {
+                return if (repository != null) {
+                    AddEditHabitViewModel(application, repository) as T
+                } else {
+                    AddEditHabitViewModel(application) as T
+                }
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
 }
 

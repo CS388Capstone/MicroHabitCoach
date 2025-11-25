@@ -115,3 +115,16 @@ class HabitRepository(private val database: AppDatabase) {
     }
 }
 
+    override suspend fun saveHabit(habit: Habit) {
+        habitDao.insertHabit(habit)
+    }
+
+    override suspend fun completeHabit(habitId: String) {
+        val habit = habitDao.getHabitById(habitId) ?: return
+        val updatedHabit = habit.copy(
+            streakCount = habit.streakCount + 1,
+            updatedAt = System.currentTimeMillis()
+        )
+        habitDao.updateHabit(updatedHabit)
+    }
+}

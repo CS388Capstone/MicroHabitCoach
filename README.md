@@ -479,5 +479,40 @@ https://github.com/user-attachments/assets/5aa53ba3-acaf-44f3-8624-dd64c8896349
 
 ### Testing & Documentation
 - [ ] Test Add → Display → Complete → Delete flow  
-- [ ] Update README with com
+- [x] Update README with Add/Edit Habit implementation details
+
+### Add/Edit Habit Screen (Implemented)
+`AddEditHabitFragment` provides dynamic form fields based on selected `HabitType`:
+
+| Type | Fields |
+|------|--------|
+| Time | Name, Days (ChipGroup Mon–Sun), Times (add via TimePicker), Preview |
+| Motion | Name, Motion Type (dropdown: walk/run/stationary), Duration Threshold (minutes), Preview |
+| Location | Name, Location Picker (placeholder demo), Geofence Radius (meters), Preview |
+
+Navigation & Arguments:
+* Fragment is startDestination in `nav_graph.xml`.
+* Safe Args: `existingHabitId` (String?), `prefillJson` (String? JSON representation of a Habit template).
+* When `existingHabitId` provided, fragment loads and edits existing Habit.
+* When `prefillJson` provided and not editing, pre-populates fields.
+
+Validation Rules:
+* Name required for all types.
+* Time: ≥1 reminder time and ≥1 day selected.
+* Motion: motionType not blank; duration > 0.
+* Location: location selected; radius > 0.
+
+Real-time Preview:
+* Card updates as user edits fields, summarizing configuration.
+
+Persistence:
+* Uses `DatabaseModule` to access `HabitDao` and inserts/updates `Habit` with generated UUID when new.
+
+Testing:
+* `HabitFormValidatorTest` covers validation edge cases for each habit type using `HabitFormValidator`.
+
+Next Steps:
+* Integrate actual location picker & motion sensor binding.
+* Add Today & Explore screens to drive navigation into Add/Edit.
+* Enhance preview with category and streak forecast.
 

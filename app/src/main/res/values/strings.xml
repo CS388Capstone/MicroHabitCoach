@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MicroHabit Coach</string>
+
+    <!-- Add/Edit Habit -->
+    <string name="add_habit">Add Habit</string>
+    <string name="edit_habit">Edit Habit</string>
+    <string name="habit_name">Habit name</string>
+    <string name="category">Category</string>
+    <string name="habit_type">Habit type</string>
+    <string name="time_based">Time-based</string>
+    <string name="motion_based">Motion-based</string>
+    <string name="location_based">Location-based</string>
+    <string name="reminder_times">Reminder times</string>
+    <string name="no_reminder_times">No reminder times added yet</string>
+    <string name="add_reminder_time">Add reminder time</string>
+    <string name="reminder_time_exists">This reminder time already exists</string>
+    <string name="days_of_week">Days of week</string>
+    <string name="monday_short">Mon</string>
+    <string name="tuesday_short">Tue</string>
+    <string name="wednesday_short">Wed</string>
+    <string name="thursday_short">Thu</string>
+    <string name="friday_short">Fri</string>
+    <string name="saturday_short">Sat</string>
+    <string name="sunday_short">Sun</string>
+    <string name="motion_type">Motion type</string>
+    <string name="duration_minutes">Duration threshold</string>
+    <string name="minutes_suffix">min</string>
+    <string name="location">Location</string>
+    <string name="pick_location">Pick location</string>
+    <string name="no_location_selected">No location selected</string>
+    <string name="radius_meters">Geofence radius</string>
+    <string name="meters_suffix">m</string>
+    <string name="preview">Preview</string>
+    <string name="habit_name_placeholder">New Habit</string>
+    <string name="type_placeholder">Type · Category</string>
+    <string name="details_placeholder">Details update as you fill the form.</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="habit_saved">Habit saved</string>
+    <string name="error_required">Required</string>
+    <string name="error_positive_number">Must be greater than 0</string>
+    <string name="location_mock_message">Location picker coming soon. Using demo location.</string>
+
+    <!-- Preview helpers -->
+    <string name="preview_type_format">%1$s • %2$s</string>
+    <string name="preview_time_details">Reminders: %1$s\nDays: %2$s</string>
+    <string name="preview_motion_details">Motion: %1$s\nDuration: %2$d min</string>
+    <string name="preview_location_details">Location: %1$s\nRadius: %2$.0f m</string>
+    <string name="preview_no_days">No days selected</string>
+    <string name="preview_no_times">No times added</string>
+    <string name="preview_no_motion">Not set</string>
+    <string name="preview_no_location">Not selected</string>
 </resources>
 

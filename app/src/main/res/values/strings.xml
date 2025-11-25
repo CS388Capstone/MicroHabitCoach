@@ -51,5 +51,19 @@
     <string name="preview_no_times">No times added</string>
     <string name="preview_no_motion">Not set</string>
     <string name="preview_no_location">Not selected</string>
+
+    <!-- Today Screen -->
+    <string name="today">Today</string>
+    <string name="habits_summary_placeholder">0 of 0 habits completed</string>
+    <string name="habits_summary_format">%1$d of %2$d habits completed</string>
+    <string name="no_habits_message">No habits yet. Create your first habit to get started!</string>
+    <string name="mark_complete">Mark as complete</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_habit">Delete Habit</string>
+    <string name="delete_habit_confirmation">Are you sure you want to delete this habit? This action cannot be undone.</string>
+    <string name="confirm">Confirm</string>
+    <string name="habit_deleted">Habit deleted</string>
+    <string name="habit_completed">Habit completed!</string>
 </resources>
 

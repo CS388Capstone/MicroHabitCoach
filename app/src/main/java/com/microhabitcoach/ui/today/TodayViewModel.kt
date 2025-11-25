@@ -57,6 +57,20 @@ class TodayViewModel(
         }
     }
 
+    fun deleteHabit(id: String) {
+        viewModelScope.launch {
+            try {
+                repository.deleteHabit(id)
+            } catch (t: Throwable) {
+                _error.value = t.message ?: "Failed to delete habit"
+            }
+        }
+    }
+
+    fun clearError() {
+        _error.value = null
+    }
+
     override fun onCleared() {
         habitsJob?.cancel()
         super.onCleared()

@@ -486,5 +486,9 @@ List the completed user stories from this unit
 <img width="272" height="850" alt="image" src="https://github.com/user-attachments/assets/237d0bfc-13f4-4758-b8b0-4921e1c337b5" />
 
 App Demo Video
-[Embed the YouTube/Vimeo link of your Completed Demo Day prep video
-](https://www.youtube.com/watch?v=k-sR59Sg97M)
+[Video](https://www.youtube.com/watch?v=k-sR59Sg97M)
+
+Current Progress GIF
+
+https://github.com/user-attachments/assets/dff59336-3853-49f4-bd93-05e3bb150441
+

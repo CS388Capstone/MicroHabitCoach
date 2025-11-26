@@ -3,7 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/todayFragment">
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.microhabitcoach.ui.login.LoginFragment"
+        android:label="@string/login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/actionLoginFragmentToOnboardingFragment"
+            app:destination="@id/onboardingFragment" />
+        <action
+            android:id="@+id/actionLoginFragmentToTodayFragment"
+            app:destination="@id/todayFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="com.microhabitcoach.ui.onboarding.OnboardingFragment"
+        android:label="@string/onboarding"
+        tools:layout="@layout/fragment_onboarding">
+        <action
+            android:id="@+id/actionOnboardingFragmentToTodayFragment"
+            app:destination="@id/todayFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/todayFragment"

@@ -17,6 +17,7 @@ data class UserPreferences(
     val quietHoursEnd: String? = null, // HH:mm format
     val notificationsEnabled: Boolean = true,
     val batteryOptimizationMode: Boolean = false,
+    val hasCompletedOnboarding: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

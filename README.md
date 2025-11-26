@@ -482,6 +482,7 @@ GitHub Project board
 
 Completed user stories
 List the completed user stories from this unit
+
 <img width="272" height="850" alt="image" src="https://github.com/user-attachments/assets/237d0bfc-13f4-4758-b8b0-4921e1c337b5" />
 
 App Demo Video

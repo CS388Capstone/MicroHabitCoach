@@ -447,7 +447,7 @@ Sprints
 ---
 
 ### Core Architecture
-- [ ] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
+- [x] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
 - [ ] Create Repository Layer connecting DAO ↔ ViewModel  
 - [ ] Build Habit ViewModel and LiveData for UI binding  
 - [ ] Verify database CRUD operations (unit tests or logs)  
@@ -474,3 +474,16 @@ Sprints
 - [ ] Test Add → Display → Complete → Delete flow  
 - [ ] Update README with com
 
+
+
+Milestone 3 - Build Sprint 2 (Unit 9)
+GitHub Project board
+<img width="1355" height="1014" alt="image" src="https://github.com/user-attachments/assets/1ea7a559-f959-4f5f-b114-2688576e4a7a" />
+
+Completed user stories
+List the completed user stories from this unit
+<img width="272" height="850" alt="image" src="https://github.com/user-attachments/assets/237d0bfc-13f4-4758-b8b0-4921e1c337b5" />
+
+App Demo Video
+[Embed the YouTube/Vimeo link of your Completed Demo Day prep video
+](https://www.youtube.com/watch?v=k-sR59Sg97M)

@@ -431,12 +431,6 @@ Sprints
 <img width="1157" height="881" alt="image" src="https://github.com/user-attachments/assets/d1dabe74-d24b-4d1e-a787-adbc9bc1c3c4" />
 
 
-Progress This Far
-
-https://github.com/user-attachments/assets/5aa53ba3-acaf-44f3-8624-dd64c8896349
-
-
-
 
 **Goal:** Build the base architecture, database, and main user flow (CRUD + Today screen).  
 **Due:** End of Unit 8
@@ -453,15 +447,14 @@ https://github.com/user-attachments/assets/5aa53ba3-acaf-44f3-8624-dd64c8896349
 ---
 
 ### Core Architecture
-- [X] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
-- [X] Create Repository Layer connecting DAO ↔ ViewModel  
+- [ ] Implement Room Database (`Habit`, `CompletionLog` entities + DAO)  
+- [ ] Create Repository Layer connecting DAO ↔ ViewModel  
 - [ ] Build Habit ViewModel and LiveData for UI binding  
 - [ ] Verify database CRUD operations (unit tests or logs)  
 
 ---
 
 ### UI / UX Implementation
-- [X] Set up base view of the app
 - [ ] Build Today Dashboard UI – list of habits (grouped by completion state)  
 - [ ] Add Mark Complete button (one-tap completion with visual feedback)  
 - [ ] Create Add/Edit Habit screen with dynamic form for type selection  
@@ -479,40 +472,5 @@ https://github.com/user-attachments/assets/5aa53ba3-acaf-44f3-8624-dd64c8896349
 
 ### Testing & Documentation
 - [ ] Test Add → Display → Complete → Delete flow  
-- [x] Update README with Add/Edit Habit implementation details
-
-### Add/Edit Habit Screen (Implemented)
-`AddEditHabitFragment` provides dynamic form fields based on selected `HabitType`:
-
-| Type | Fields |
-|------|--------|
-| Time | Name, Days (ChipGroup Mon–Sun), Times (add via TimePicker), Preview |
-| Motion | Name, Motion Type (dropdown: walk/run/stationary), Duration Threshold (minutes), Preview |
-| Location | Name, Location Picker (placeholder demo), Geofence Radius (meters), Preview |
-
-Navigation & Arguments:
-* Fragment is startDestination in `nav_graph.xml`.
-* Safe Args: `existingHabitId` (String?), `prefillJson` (String? JSON representation of a Habit template).
-* When `existingHabitId` provided, fragment loads and edits existing Habit.
-* When `prefillJson` provided and not editing, pre-populates fields.
-
-Validation Rules:
-* Name required for all types.
-* Time: ≥1 reminder time and ≥1 day selected.
-* Motion: motionType not blank; duration > 0.
-* Location: location selected; radius > 0.
-
-Real-time Preview:
-* Card updates as user edits fields, summarizing configuration.
-
-Persistence:
-* Uses `DatabaseModule` to access `HabitDao` and inserts/updates `Habit` with generated UUID when new.
-
-Testing:
-* `HabitFormValidatorTest` covers validation edge cases for each habit type using `HabitFormValidator`.
-
-Next Steps:
-* Integrate actual location picker & motion sensor binding.
-* Add Today & Explore screens to drive navigation into Add/Edit.
-* Enhance preview with category and streak forecast.
+- [ ] Update README with com
 

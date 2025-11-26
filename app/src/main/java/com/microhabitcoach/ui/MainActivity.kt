@@ -2,8 +2,13 @@ package com.microhabitcoach.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.microhabitcoach.R
 import com.microhabitcoach.data.database.DatabaseModule
+import com.microhabitcoach.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -11,14 +16,38 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     
+    private lateinit var binding: ActivityMainBinding
     private val activityScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // Setup navigation
+        setupNavigation()
         
         // Test database connection
         testDatabase()
+    }
+    
+    private fun setupNavigation() {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        
+        // Setup bottom navigation
+        binding.bottomNavigation.setupWithNavController(navController)
+        
+        // Configure AppBar with top-level destinations
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.todayFragment,
+                R.id.exploreFragment,
+                R.id.statsFragment,
+                R.id.settingsFragment
+            )
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
     }
     
     private fun testDatabase() {

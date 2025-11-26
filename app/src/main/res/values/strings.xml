@@ -69,5 +69,42 @@
     <string name="habit_icon">Habit icon</string>
     <string name="next_reminder">Next: %1$s</string>
     <string name="no_reminder">No reminders</string>
+
+    <!-- Login Screen -->
+    <string name="login">Login</string>
+    <string name="login_subtitle">Sign in to continue</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="create_account">Create Account</string>
+    <string name="signup_coming_soon">Sign up coming soon!</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding">Onboarding</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish</string>
+    <string name="allow">Allow</string>
+    <string name="get_started">Get Started</string>
+    <string name="select_templates">Select Templates</string>
+    <string name="onboarding_icon">Onboarding icon</string>
+    <string name="skip_onboarding">Skip Onboarding?</string>
+    <string name="skip_onboarding_message">You can always set up permissions later in Settings. Continue anyway?</string>
+
+    <!-- Onboarding Steps -->
+    <string name="onboarding_welcome_title">Welcome to MicroHabit Coach</string>
+    <string name="onboarding_welcome_description">Build better habits with context-aware suggestions and automatic completion tracking.</string>
+    <string name="onboarding_templates_title">Choose Your Habits</string>
+    <string name="onboarding_templates_description">Start with our smart templates or create your own custom habits.</string>
+    <string name="onboarding_motion_title">Motion Detection</string>
+    <string name="onboarding_motion_description">Let us detect when you\'re walking or running to auto-complete your movement habits.</string>
+    <string name="onboarding_location_title">Location Services</string>
+    <string name="onboarding_location_description">Get reminders when you arrive at specific locations, like the gym or home.</string>
+    <string name="onboarding_notifications_title">Stay on Track</string>
+    <string name="onboarding_notifications_description">Receive helpful reminders and streak countdown notifications to keep your habits going.</string>
+
+    <!-- Permission Explanations -->
+    <string name="permission_activity_recognition_explanation">We need motion permission to automatically complete your walking, running, or exercise habits when you meet your goals.</string>
+    <string name="permission_location_explanation">We need location permission to send you reminders when you arrive at specific places, like reminding you to hydrate when you reach the gym.</string>
+    <string name="permission_notification_explanation">We need notification permission to send you habit reminders and streak countdown alerts to help you stay on track.</string>
 </resources>
 

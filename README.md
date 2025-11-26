@@ -483,16 +483,16 @@ GitHub Project board
 
 
 Completed User Stories (Sprint 1 - Milestone 2)
-[x] Project Setup & Architecture - Android Studio project with dependencies and MVVM structure
-[x] Room Database Setup - All entities, DAOs, and database class implemented
-[x] Repository Layer - HabitRepository and ApiRepository with LiveData observables
-[x] Navigation Setup - Navigation Component with all screen destinations and bottom navigation
-[x] Login & Onboarding UI - Login and onboarding screens with permission requests
-[x] Today Screen UI - Scrollable habit list with summary banner and empty states
-[x] Add/Edit Habit UI - Dynamic form based on habit type (Time/Motion/Location)
-[x] ViewModels - TodayViewModel and AddEditHabitViewModel with reactive LiveData
-[x] Basic CRUD Operations - Create, Read, Update, Delete habits with persistence
-[x] One-Tap Completion - Habit completion with visual feedback (confetti, animations)
+- [x] Project Setup & Architecture - Android Studio project with dependencies and MVVM structure
+- [x] Room Database Setup - All entities, DAOs, and database class implemented
+- [x] Repository Layer - HabitRepository and ApiRepository with LiveData observables
+- [x] Navigation Setup - Navigation Component with all screen destinations and bottom navigation
+- [x] Login & Onboarding UI - Login and onboarding screens with permission requests
+- [x] Today Screen UI - Scrollable habit list with summary banner and empty states
+- [x] Add/Edit Habit UI - Dynamic form based on habit type (Time/Motion/Location)
+- [x] ViewModels - TodayViewModel and AddEditHabitViewModel with reactive LiveData
+- [x] Basic CRUD Operations - Create, Read, Update, Delete habits with persistence
+- [x] One-Tap Completion - Habit completion with visual feedback (confetti, animations)
 Total: 10/10 Sprint 1 issues completed
 
 <img width="272" height="850" alt="image" src="https://github.com/user-attachments/assets/237d0bfc-13f4-4758-b8b0-4921e1c337b5" />

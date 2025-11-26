@@ -57,6 +57,9 @@ class TodayFragment : Fragment() {
             },
             onDeleteClick = { habit ->
                 showDeleteConfirmation(habit)
+            },
+            onHabitClick = { habit ->
+                navigateToHabitDetail(habit.id)
             }
         )
 
@@ -107,11 +110,59 @@ class TodayFragment : Fragment() {
     }
 
     private fun showCompletionFeedback(habitName: String) {
-        Snackbar.make(
+        // Show snackbar
+        val snackbar = Snackbar.make(
             binding.root,
             getString(R.string.habit_completed_message, habitName),
             Snackbar.LENGTH_SHORT
-        ).show()
+        )
+        snackbar.show()
+        
+        // Add confetti-like visual feedback
+        showConfettiAnimation()
+    }
+    
+    private fun showConfettiAnimation() {
+        // Create floating emoji particles for confetti effect
+        val rootView = binding.root
+        val width = rootView.width
+        val height = rootView.height
+        
+        if (width > 0 && height > 0) {
+            for (i in 0..10) {
+                val emoji = android.widget.TextView(requireContext()).apply {
+                    text = "🎉"
+                    textSize = 24f
+                    x = (Math.random() * width).toFloat()
+                    y = height.toFloat()
+                    alpha = 1f
+                    layoutParams = ViewGroup.MarginLayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                }
+                
+                // Add to CoordinatorLayout if available, otherwise to root
+                val parent = if (rootView is androidx.coordinatorlayout.widget.CoordinatorLayout) {
+                    rootView
+                } else {
+                    rootView as? ViewGroup ?: return
+                }
+                
+                parent.addView(emoji)
+                
+                emoji.animate()
+                    .translationY(-height.toFloat())
+                    .translationX((Math.random() * 200 - 100).toFloat())
+                    .alpha(0f)
+                    .setDuration(1000)
+                    .setStartDelay((i * 50).toLong())
+                    .withEndAction {
+                        parent.removeView(emoji)
+                    }
+                    .start()
+            }
+        }
     }
 
     private fun showDeleteConfirmation(habit: Habit) {
@@ -135,6 +186,12 @@ class TodayFragment : Fragment() {
     private fun navigateToEditHabit(habitId: String) {
         findNavController().navigate(
             TodayFragmentDirections.actionTodayFragmentToAddEditHabitFragment(habitId = habitId)
+        )
+    }
+
+    private fun navigateToHabitDetail(habitId: String) {
+        findNavController().navigate(
+            TodayFragmentDirections.actionTodayFragmentToHabitDetailFragment(habitId = habitId)
         )
     }
 

@@ -36,6 +36,51 @@
         <action
             android:id="@+id/actionTodayFragmentToAddEditHabitFragment"
             app:destination="@id/addEditHabitFragment" />
+        <action
+            android:id="@+id/actionTodayFragmentToHabitDetailFragment"
+            app:destination="@id/habitDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/exploreFragment"
+        android:name="com.microhabitcoach.ui.explore.ExploreFragment"
+        android:label="@string/explore"
+        tools:layout="@layout/fragment_explore">
+        <action
+            android:id="@+id/actionExploreFragmentToAddEditHabitFragment"
+            app:destination="@id/addEditHabitFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/statsFragment"
+        android:name="com.microhabitcoach.ui.stats.StatsFragment"
+        android:label="@string/stats"
+        tools:layout="@layout/fragment_stats">
+        <action
+            android:id="@+id/actionStatsFragmentToHabitDetailFragment"
+            app:destination="@id/habitDetailFragment" />
+        <action
+            android:id="@+id/actionStatsFragmentToSettingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.microhabitcoach.ui.settings.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/habitDetailFragment"
+        android:name="com.microhabitcoach.ui.habitdetail.HabitDetailFragment"
+        android:label="@string/habit_detail"
+        tools:layout="@layout/fragment_habit_detail">
+        <argument
+            android:name="habitId"
+            app:argType="string" />
+        <action
+            android:id="@+id/actionHabitDetailFragmentToAddEditHabitFragment"
+            app:destination="@id/addEditHabitFragment" />
     </fragment>
 
     <fragment

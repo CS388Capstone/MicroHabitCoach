@@ -19,7 +19,8 @@ import java.util.Calendar
 class HabitItemAdapter(
     private val onCompleteClick: (Habit) -> Unit,
     private val onEditClick: (Habit) -> Unit,
-    private val onDeleteClick: (Habit) -> Unit
+    private val onDeleteClick: (Habit) -> Unit,
+    private val onHabitClick: (Habit) -> Unit
 ) : ListAdapter<HabitWithCompletion, HabitItemAdapter.HabitViewHolder>(HabitDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitViewHolder {
@@ -38,9 +39,14 @@ class HabitItemAdapter(
     inner class HabitViewHolder(
         private val binding: ItemHabitBinding
     ) : RecyclerView.ViewHolder(binding.root) {
+        
+        private var previousCompletionState: Boolean = false
 
         fun bind(habitWithCompletion: HabitWithCompletion) {
             val habit = habitWithCompletion.habit
+            val wasCompleted = previousCompletionState
+            val isNowCompleted = habitWithCompletion.isCompletedToday
+            
             binding.tvHabitName.text = habit.name
             binding.tvHabitType.text = "${habit.type.displayName()} • ${habit.category.displayName()}"
             binding.tvStreak.text = "🔥 ${habit.streakCount} day streak"
@@ -48,6 +54,14 @@ class HabitItemAdapter(
 
             // Set habit icon
             binding.ivHabitIcon.setImageResource(getIconForCategory(habit.category))
+            
+            // Add color transition animation when habit is completed
+            if (!wasCompleted && isNowCompleted) {
+                animateCompletion()
+            }
+            
+            // Update previous state
+            previousCompletionState = isNowCompleted
 
             // Set progress (based on streak, max 30 days for 100%)
             val maxStreak = 30
@@ -68,6 +82,11 @@ class HabitItemAdapter(
                 binding.tvNextReminder.isVisible = false
             }
 
+            // Make entire card clickable to navigate to detail
+            binding.root.setOnClickListener {
+                onHabitClick(habit)
+            }
+
             binding.checkboxComplete.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked && !habitWithCompletion.isCompletedToday) {
                     onCompleteClick(habit)
@@ -81,6 +100,44 @@ class HabitItemAdapter(
             binding.btnDelete.setOnClickListener {
                 onDeleteClick(habit)
             }
+        }
+        
+        private fun animateCompletion() {
+            // Animate card background color transition
+            val cardView = binding.root as? com.google.android.material.card.MaterialCardView
+            cardView?.let { card ->
+                val context = binding.root.context
+                val originalColor = android.graphics.Color.parseColor("#FFFFFF") // Default white
+                val completedColor = android.graphics.Color.argb(
+                    100, // Light tint
+                    76,  // Green RGB values
+                    175,
+                    80
+                )
+                
+                // Create color animation
+                android.animation.ValueAnimator.ofArgb(originalColor, completedColor, originalColor).apply {
+                    duration = 1500
+                    addUpdateListener { animator ->
+                        card.setCardBackgroundColor(animator.animatedValue as Int)
+                    }
+                    start()
+                }
+            }
+            
+            // Animate scale pulse
+            binding.root.animate()
+                .scaleX(1.05f)
+                .scaleY(1.05f)
+                .setDuration(200)
+                .withEndAction {
+                    binding.root.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(200)
+                        .start()
+                }
+                .start()
         }
 
         private fun getIconForCategory(category: HabitCategory): Int {

@@ -477,18 +477,30 @@ Sprints
 
 
 Milestone 3 - Build Sprint 2 (Unit 9)
+
 GitHub Project board
 <img width="1355" height="1014" alt="image" src="https://github.com/user-attachments/assets/1ea7a559-f959-4f5f-b114-2688576e4a7a" />
 
-Completed user stories
-List the completed user stories from this unit
+
+Completed User Stories (Sprint 1 - Milestone 2)
+[x] Project Setup & Architecture - Android Studio project with dependencies and MVVM structure
+[x] Room Database Setup - All entities, DAOs, and database class implemented
+[x] Repository Layer - HabitRepository and ApiRepository with LiveData observables
+[x] Navigation Setup - Navigation Component with all screen destinations and bottom navigation
+[x] Login & Onboarding UI - Login and onboarding screens with permission requests
+[x] Today Screen UI - Scrollable habit list with summary banner and empty states
+[x] Add/Edit Habit UI - Dynamic form based on habit type (Time/Motion/Location)
+[x] ViewModels - TodayViewModel and AddEditHabitViewModel with reactive LiveData
+[x] Basic CRUD Operations - Create, Read, Update, Delete habits with persistence
+[x] One-Tap Completion - Habit completion with visual feedback (confetti, animations)
+Total: 10/10 Sprint 1 issues completed
 
 <img width="272" height="850" alt="image" src="https://github.com/user-attachments/assets/237d0bfc-13f4-4758-b8b0-4921e1c337b5" />
 
 App Demo Video
 [Video](https://www.youtube.com/watch?v=k-sR59Sg97M)
 
-Current Progress GIF
+Current Progress GIFs
 
 https://github.com/user-attachments/assets/dff59336-3853-49f4-bd93-05e3bb150441
 

@@ -19,7 +19,7 @@ import com.microhabitcoach.data.database.entity.UserPreferences
         ApiSuggestion::class,
         UserPreferences::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(

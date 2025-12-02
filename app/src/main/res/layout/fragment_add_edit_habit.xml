@@ -1,372 +1,629 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     tools:context=".ui.habit.AddEditHabitFragment">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <TextView
-            android:id="@+id/tvTitle"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/add_habit"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilHabitName"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/habit_name"
-            app:errorEnabled="true">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etHabitName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:inputType="textCapSentences" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilCategory"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/category"
-            android:layout_marginTop="12dp">
-
-            <Spinner
-                android:id="@+id/spinnerCategory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:id="@+id/tvTypeLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/habit_type"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:singleSelection="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:text="@string/time_based"
-                android:checked="true" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipMotion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:text="@string/motion_based" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:text="@string/location_based" />
-        </com.google.android.material.chip.ChipGroup>
-
-        <!-- Time-based fields -->
-        <LinearLayout
-            android:id="@+id/sectionTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvReminderTimesLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/reminder_times"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvNoReminderTimes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/no_reminder_times"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_marginTop="4dp" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupReminderTimes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:visibility="gone" />
-
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@android:drawable/ic_menu_revert"
+            app:title="@string/add_habit"
+            app:titleTextColor="?attr/colorOnSurface">
+            
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAddReminderTime"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:id="@+id/btnSave"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/add_reminder_time" />
+                android:layout_gravity="end"
+                android:text="@string/save"
+                app:icon="@android:drawable/ic_menu_save"
+                app:iconGravity="textStart" />
+        </com.google.android.material.appbar.MaterialToolbar>
 
-            <TextView
-                android:id="@+id/tvDaysLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/days_of_week"
-                android:textStyle="bold" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupDays"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:singleSelection="false">
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipMonday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/monday_short" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipTuesday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/tuesday_short" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipWednesday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/wednesday_short" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipThursday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/thursday_short" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipFriday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/friday_short" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSaturday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/saturday_short" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSunday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Chip.Filter"
-                    android:text="@string/sunday_short" />
-            </com.google.android.material.chip.ChipGroup>
-        </LinearLayout>
-
-        <!-- Motion-based fields -->
         <LinearLayout
-            android:id="@+id/sectionMotion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:padding="24dp">
 
+            <!-- Habit Name Input -->
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilMotionType"
+                android:id="@+id/tilHabitName"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/motion_type"
+                android:hint="@string/habit_name"
                 app:errorEnabled="true">
 
-                <AutoCompleteTextView
-                    android:id="@+id/actvMotionType"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapWords" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilDuration"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/duration_minutes"
-                app:errorEnabled="true"
-                app:suffixText="@string/minutes_suffix">
-
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDuration"
+                    android:id="@+id/etHabitName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:imeOptions="actionNext"
+                    android:inputType="textCapSentences"
+                    android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
 
-        <!-- Location-based fields -->
-        <LinearLayout
-            android:id="@+id/sectionLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
+            <!-- Category Selection - Icon Buttons in 2x2 Grid -->
             <TextView
-                android:id="@+id/tvLocationLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/location"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvLocationAddress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/no_location_selected"
-                android:textColor="?attr/colorOnSurfaceVariant" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPickLocation"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/pick_location" />
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/category"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilRadius"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/radius_meters"
-                app:errorEnabled="true"
-                app:suffixText="@string/meters_suffix">
+                android:columnCount="2"
+                android:rowCount="2"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="false"
+                android:columnOrderPreserved="false">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRadius"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal" />
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCategoryFitness"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="8dp"
+                    android:minHeight="100dp"
+                    android:minWidth="0dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="@string/fitness"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_compass"
+                    app:iconGravity="textTop"
+                    app:iconPadding="8dp"
+                    app:iconSize="32dp" />
 
-        <TextView
-            android:id="@+id/tvPreviewLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:text="@string/preview"
-            android:textStyle="bold"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCategoryWellness"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="8dp"
+                    android:minHeight="100dp"
+                    android:minWidth="0dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="@string/wellness"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_agenda"
+                    app:iconGravity="textTop"
+                    app:iconPadding="8dp"
+                    app:iconSize="32dp" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardPreview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCategoryProductivity"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="8dp"
+                    android:minHeight="100dp"
+                    android:minWidth="0dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="@string/productivity"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_sort_by_size"
+                    app:iconGravity="textTop"
+                    app:iconPadding="8dp"
+                    app:iconSize="32dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCategoryLearning"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_rowWeight="1"
+                    android:layout_margin="8dp"
+                    android:minHeight="100dp"
+                    android:minWidth="0dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="@string/learning"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_help"
+                    app:iconGravity="textTop"
+                    app:iconPadding="8dp"
+                    app:iconSize="32dp" />
+            </GridLayout>
+
+            <!-- Type Selection - Icon Buttons -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/habit_type"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="horizontal"
+                android:weightSum="3">
 
-                <TextView
-                    android:id="@+id/tvPreviewName"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTypeTime"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="80dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="TIME"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_recent_history"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconSize="20dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTypeMotion"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="80dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="MOTION"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_directions"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconSize="20dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnTypeLocation"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:minHeight="80dp"
+                    android:gravity="center"
+                    android:insetTop="12dp"
+                    android:insetBottom="12dp"
+                    android:insetLeft="12dp"
+                    android:insetRight="12dp"
+                    android:padding="12dp"
+                    android:text="LOCATION"
+                    android:textAllCaps="true"
+                    android:textSize="11sp"
+                    app:icon="@android:drawable/ic_menu_mylocation"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp"
+                    app:iconSize="20dp" />
+            </LinearLayout>
+
+            <!-- Time-based Section -->
+            <LinearLayout
+                android:id="@+id/sectionTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <!-- Reminder Times -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/habit_name_placeholder"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-                <TextView
-                    android:id="@+id/tvPreviewType"
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_recent_history"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/reminder_times"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCustomTime"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="24dp"
+                    android:text="+ Custom" />
+
+                <!-- Days -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_my_calendar"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/days_of_week"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupDays"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="@string/type_placeholder"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:layout_marginBottom="8dp"
+                    app:singleSelection="false"
+                    app:chipSpacing="4dp">
 
-                <TextView
-                    android:id="@+id/tvPreviewDetails"
-                    android:layout_width="match_parent"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipMonday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="M" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipTuesday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="T" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipWednesday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="W" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipThursday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="T" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFriday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="F" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSaturday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="S" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSunday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:text="S" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipEveryDay"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@string/details_placeholder"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
+                    android:layout_marginBottom="24dp"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:text="Every Day" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:id="@+id/llActions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:gravity="end"
-            android:orientation="horizontal">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDelete"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
+            <!-- Motion-based Section -->
+            <LinearLayout
+                android:id="@+id/sectionMotion"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/delete"
-                android:visibility="gone"
-                app:icon="@android:drawable/ic_menu_delete" />
+                android:layout_marginTop="32dp"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCancel"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/cancel" />
+                <!-- Motion Type -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSave"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="wrap_content"
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_directions"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/motion_type"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupMotionType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:singleSelection="true"
+                    app:chipSpacing="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipWalk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="🚶 Walk" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipRun"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="🏃 Run" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipStationary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="🧘 Stationary" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- Duration -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_recent_history"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/duration_minutes"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupDuration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:chipSpacing="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipDuration10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="10 min" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipDuration20"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="20 min" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipDuration30"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="30 min"
+                        android:checked="true" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipDuration60"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="60 min" />
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+
+            <!-- Location-based Section -->
+            <LinearLayout
+                android:id="@+id/sectionLocation"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="@string/save" />
+                android:layout_marginTop="32dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Location -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_mylocation"
+                        app:tint="?attr/colorPrimary" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/location"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupLocationPresets"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:singleSelection="true"
+                    app:chipSpacing="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipLocationHome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="🏠 Home" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipLocationGym"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="💪 Gym" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipLocationWork"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:text="💼 Work" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPickLocation"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="+ Custom Location"
+                    app:icon="@android:drawable/ic_input_add" />
+
+                <TextView
+                    android:id="@+id/tvLocationAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/no_location_selected"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <!-- Radius - shown only for custom locations -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilRadius"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:hint="@string/radius_meters"
+                    app:errorEnabled="true"
+                    app:suffixText="@string/meters_suffix">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRadius"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
         </LinearLayout>
 
-    </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

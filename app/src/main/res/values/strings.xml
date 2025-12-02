@@ -7,6 +7,10 @@
     <string name="edit_habit">Edit Habit</string>
     <string name="habit_name">Habit name</string>
     <string name="category">Category</string>
+    <string name="fitness">Fitness</string>
+    <string name="wellness">Wellness</string>
+    <string name="productivity">Productivity</string>
+    <string name="learning">Learning</string>
     <string name="habit_type">Habit type</string>
     <string name="time_based">Time-based</string>
     <string name="motion_based">Motion-based</string>

@@ -5,15 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.microhabitcoach.R
@@ -40,6 +37,9 @@ class AddEditHabitFragment : Fragment() {
     private val reminderTimes = mutableListOf<LocalTime>()
     private val selectedDays = mutableSetOf<Int>()
     private var selectedLocation: LocationData? = null
+    private var selectedMotionType: String? = null
+    private var selectedDuration: Int? = null
+    private var selectedRadius: Float? = null
     private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
     override fun onCreateView(
@@ -53,45 +53,122 @@ class AddEditHabitFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupCategorySpinner()
-        setupMotionTypeDropdown()
-        setupTypeSelector()
+        
+        setupToolbar()
+        setupCategoryButtons()
+        setupTypeButtons()
+        setupTimePresets()
         setupDayChips()
-        setupReminderTimes()
-        setupLocationPicker()
-        setupPreviewWatchers()
+        setupMotionPresets()
+        setupLocationPresets()
         setupActions()
         observeViewModel()
         prefillFromArgs()
-        updatePreview()
     }
 
-    private fun setupCategorySpinner() {
-        val categories = HabitCategory.values().map { it.displayName() }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerCategory.adapter = adapter
-        binding.spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                updatePreview()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
         }
     }
 
-    private fun setupMotionTypeDropdown() {
-        val motionItems = listOf("Walk", "Run", "Stationary")
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, motionItems)
-        binding.actvMotionType.setAdapter(adapter)
-        binding.actvMotionType.doAfterTextChanged { updatePreview() }
+    private fun setupCategoryButtons() {
+        binding.btnCategoryFitness.setOnClickListener {
+            selectCategory(HabitCategory.FITNESS)
+        }
+        binding.btnCategoryWellness.setOnClickListener {
+            selectCategory(HabitCategory.WELLNESS)
+        }
+        binding.btnCategoryProductivity.setOnClickListener {
+            selectCategory(HabitCategory.PRODUCTIVITY)
+        }
+        binding.btnCategoryLearning.setOnClickListener {
+            selectCategory(HabitCategory.LEARNING)
+        }
+    }
+    
+    private fun selectCategory(category: HabitCategory) {
+        // Update button states
+        binding.btnCategoryFitness.isSelected = category == HabitCategory.FITNESS
+        binding.btnCategoryWellness.isSelected = category == HabitCategory.WELLNESS
+        binding.btnCategoryProductivity.isSelected = category == HabitCategory.PRODUCTIVITY
+        binding.btnCategoryLearning.isSelected = category == HabitCategory.LEARNING
+        
+        // Update button styles to show selection
+        updateCategoryButtonStyle(binding.btnCategoryFitness, category == HabitCategory.FITNESS)
+        updateCategoryButtonStyle(binding.btnCategoryWellness, category == HabitCategory.WELLNESS)
+        updateCategoryButtonStyle(binding.btnCategoryProductivity, category == HabitCategory.PRODUCTIVITY)
+        updateCategoryButtonStyle(binding.btnCategoryLearning, category == HabitCategory.LEARNING)
+    }
+    
+    private fun updateCategoryButtonStyle(button: com.google.android.material.button.MaterialButton, isSelected: Boolean) {
+        button.elevation = if (isSelected) 8f else 2f
+        button.strokeWidth = if (isSelected) 3 else 1
     }
 
-    private fun setupTypeSelector() = with(binding) {
-        chipGroupType.setOnCheckedStateChangeListener { _, _ ->
-            toggleSections(currentType())
-            updatePreview()
+    private fun setupTypeButtons() {
+        binding.btnTypeTime.setOnClickListener {
+            selectType(HabitType.TIME)
         }
+        binding.btnTypeMotion.setOnClickListener {
+            selectType(HabitType.MOTION)
+        }
+        binding.btnTypeLocation.setOnClickListener {
+            selectType(HabitType.LOCATION)
+        }
+        // Default to TIME
+        selectType(HabitType.TIME)
+    }
+
+    private fun selectType(type: HabitType) {
+        // Update button states - toggle between outlined and filled styles
+        binding.btnTypeTime.isSelected = type == HabitType.TIME
+        binding.btnTypeMotion.isSelected = type == HabitType.MOTION
+        binding.btnTypeLocation.isSelected = type == HabitType.LOCATION
+        
+        // Update button styles to show selection
+        updateTypeButtonStyle(binding.btnTypeTime, type == HabitType.TIME)
+        updateTypeButtonStyle(binding.btnTypeMotion, type == HabitType.MOTION)
+        updateTypeButtonStyle(binding.btnTypeLocation, type == HabitType.LOCATION)
+        
+        // Toggle sections
+        binding.sectionTime.isVisible = type == HabitType.TIME
+        binding.sectionMotion.isVisible = type == HabitType.MOTION
+        binding.sectionLocation.isVisible = type == HabitType.LOCATION
+    }
+    
+    private fun updateTypeButtonStyle(button: com.google.android.material.button.MaterialButton, isSelected: Boolean) {
+        // Change elevation to show selection
+        button.elevation = if (isSelected) 8f else 2f
+    }
+
+    private fun setupTimePresets() {
+        // Custom time button
+        binding.btnCustomTime.setOnClickListener {
+            val now = LocalTime.now()
+            TimePickerDialog(
+                requireContext(),
+                { _, hour, minute ->
+                    val time = LocalTime.of(hour, minute)
+                    if (!reminderTimes.contains(time)) {
+                        reminderTimes.add(time)
+                        reminderTimes.sort()
+                        renderReminderTimeChips()
+                    } else {
+                        Snackbar.make(binding.root, R.string.reminder_time_exists, Snackbar.LENGTH_SHORT).show()
+                    }
+                },
+                now.hour,
+                now.minute,
+                false
+            ).show()
+        }
+    }
+    
+    private fun renderReminderTimeChips() {
+        // Create chips dynamically for selected times
+        // This will be displayed in a ChipGroup if needed
+        // For now, we'll just track the times in the list
     }
 
     private fun setupDayChips() {
@@ -107,79 +184,126 @@ class AddEditHabitFragment : Fragment() {
         chips.forEach { (chip, day) ->
             chip.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) selectedDays.add(day) else selectedDays.remove(day)
-                updatePreview()
+            }
+        }
+        
+        // "Every Day" chip
+        binding.chipEveryDay.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                selectedDays.addAll(1..7)
+                chips.forEach { (chip, _) -> chip.isChecked = true }
+            } else {
+                selectedDays.clear()
+                chips.forEach { (chip, _) -> chip.isChecked = false }
             }
         }
     }
 
-    private fun setupReminderTimes() {
-        binding.btnAddReminderTime.setOnClickListener {
-            val now = LocalTime.now()
-            TimePickerDialog(
-                requireContext(),
-                { _, hour, minute ->
-                    val time = LocalTime.of(hour, minute)
-                    if (!reminderTimes.contains(time)) {
-                        reminderTimes.add(time)
-                        renderReminderTimeChips()
-                        updatePreview()
-                    } else {
-                        Snackbar.make(binding.root, R.string.reminder_time_exists, Snackbar.LENGTH_SHORT).show()
-                    }
-                },
-                now.hour,
-                now.minute,
-                false
-            ).show()
+    private fun setupMotionPresets() {
+        // Motion type chips - single selection handled by ChipGroup
+        binding.chipGroupMotionType.setOnCheckedStateChangeListener { group, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val checkedChip = group.findViewById<com.google.android.material.chip.Chip>(checkedIds[0])
+                selectedMotionType = when (checkedChip.id) {
+                    binding.chipWalk.id -> "Walk"
+                    binding.chipRun.id -> "Run"
+                    binding.chipStationary.id -> "Stationary"
+                    else -> null
+                }
+            } else {
+                selectedMotionType = null
+            }
         }
-        renderReminderTimeChips()
+        
+        // Duration chips - single selection handled by ChipGroup
+        binding.chipGroupDuration.setOnCheckedStateChangeListener { group, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val checkedChip = group.findViewById<com.google.android.material.chip.Chip>(checkedIds[0])
+                selectedDuration = when (checkedChip.id) {
+                    binding.chipDuration10.id -> 10
+                    binding.chipDuration20.id -> 20
+                    binding.chipDuration30.id -> 30
+                    binding.chipDuration60.id -> 60
+                    else -> null
+                }
+            } else {
+                selectedDuration = null
+            }
+        }
+        
+        // Default to 30 min
+        binding.chipDuration30.isChecked = true
     }
 
-    private fun renderReminderTimeChips() {
-        with(binding) {
-            chipGroupReminderTimes.removeAllViews()
-            reminderTimes.sort()
-            reminderTimes.forEach { time ->
-                val chip = Chip(requireContext()).apply {
-                    text = time.format(timeFormatter)
-                    isCloseIconVisible = true
-                    setOnCloseIconClickListener {
-                        reminderTimes.remove(time)
-                        renderReminderTimeChips()
-                        updatePreview()
+    private fun setupLocationPresets() {
+        // Make location chips single selection
+        binding.chipGroupLocationPresets.setOnCheckedStateChangeListener { group, checkedIds ->
+            if (checkedIds.isEmpty()) {
+                selectedLocation = null
+                binding.tvLocationAddress.text = getString(R.string.no_location_selected)
+                binding.tilRadius.visibility = View.GONE
+            } else {
+                val checkedChip = group.findViewById<com.google.android.material.chip.Chip>(checkedIds[0])
+                when (checkedChip.id) {
+                    binding.chipLocationHome.id -> {
+                        selectedLocation = LocationData(
+                            latitude = 0.0, // Placeholder - would use actual home location
+                            longitude = 0.0,
+                            address = "Home"
+                        )
+                        binding.tvLocationAddress.text = "Home"
+                        binding.tilRadius.visibility = View.GONE
+                    }
+                    binding.chipLocationGym.id -> {
+                        selectedLocation = LocationData(
+                            latitude = 0.0, // Placeholder - would use actual gym location
+                            longitude = 0.0,
+                            address = "Gym"
+                        )
+                        binding.tvLocationAddress.text = "Gym"
+                        binding.tilRadius.visibility = View.GONE
+                    }
+                    binding.chipLocationWork.id -> {
+                        selectedLocation = LocationData(
+                            latitude = 0.0, // Placeholder - would use actual work location
+                            longitude = 0.0,
+                            address = "Work"
+                        )
+                        binding.tvLocationAddress.text = "Work"
+                        binding.tilRadius.visibility = View.GONE
                     }
                 }
-                chipGroupReminderTimes.addView(chip)
             }
-            chipGroupReminderTimes.isVisible = reminderTimes.isNotEmpty()
-            tvNoReminderTimes.isVisible = reminderTimes.isEmpty()
         }
-    }
-
-    private fun setupLocationPicker() = with(binding) {
-        btnPickLocation.setOnClickListener {
+        
+        binding.btnPickLocation.setOnClickListener {
+            // Clear preset selections
+            binding.chipGroupLocationPresets.clearCheck()
             // Placeholder until map picker is wired up
             selectedLocation = LocationData(
                 latitude = 37.7749,
                 longitude = -122.4194,
-                address = "San Francisco, CA"
+                address = "Custom Location"
             )
-            tvLocationAddress.text = selectedLocation?.address ?: getString(R.string.no_location_selected)
-            Snackbar.make(root, R.string.location_mock_message, Snackbar.LENGTH_SHORT).show()
-            updatePreview()
+            binding.tvLocationAddress.text = selectedLocation?.address ?: getString(R.string.no_location_selected)
+            binding.tilRadius.visibility = View.VISIBLE
+            binding.etRadius.setText("100")
+            Snackbar.make(binding.root, R.string.location_mock_message, Snackbar.LENGTH_SHORT).show()
+        }
+        
+        // Default radius (can be made configurable later)
+        selectedRadius = 100f
+        
+        // Listen to radius changes
+        binding.etRadius.doAfterTextChanged {
+            selectedRadius = it?.toString()?.toFloatOrNull() ?: 100f
         }
     }
 
-    private fun setupPreviewWatchers() = with(binding) {
-        etHabitName.doAfterTextChanged { updatePreview() }
-        etDuration.doAfterTextChanged { updatePreview() }
-        etRadius.doAfterTextChanged { updatePreview() }
-    }
-
     private fun setupActions() = with(binding) {
-        btnCancel.setOnClickListener { findNavController().popBackStack() }
         btnSave.setOnClickListener { attemptSave() }
-        btnDelete.setOnClickListener { attemptDelete() }
+        
+        etHabitName.doAfterTextChanged { }
     }
 
     private fun observeViewModel() {
@@ -200,11 +324,9 @@ class AddEditHabitFragment : Fragment() {
             when (state) {
                 SaveState.Saving -> {
                     binding.btnSave.isEnabled = false
-                    binding.btnDelete.isEnabled = false
                 }
                 SaveState.Success -> {
                     binding.btnSave.isEnabled = true
-                    binding.btnDelete.isEnabled = true
                     val message = if (viewModel.habit.value != null) {
                         R.string.habit_deleted
                     } else {
@@ -215,12 +337,10 @@ class AddEditHabitFragment : Fragment() {
                 }
                 is SaveState.Error -> {
                     binding.btnSave.isEnabled = true
-                    binding.btnDelete.isEnabled = true
                     showError(state.message)
                 }
                 else -> {
                     binding.btnSave.isEnabled = true
-                    binding.btnDelete.isEnabled = true
                 }
             }
         }
@@ -232,11 +352,10 @@ class AddEditHabitFragment : Fragment() {
     private fun prefillFromArgs() {
         val habitId = args.habitId
         if (!habitId.isNullOrBlank()) {
-            binding.tvTitle.text = getString(R.string.edit_habit)
-            binding.btnDelete.isVisible = true
+            binding.toolbar.title = getString(R.string.edit_habit)
             viewModel.loadHabit(habitId)
         } else {
-            binding.btnDelete.isVisible = false
+            binding.toolbar.title = getString(R.string.add_habit)
             // Pre-fill from suggestion if available
             args.suggestionName?.takeIf { it.isNotBlank() }?.let {
                 binding.etHabitName.setText(it)
@@ -244,10 +363,8 @@ class AddEditHabitFragment : Fragment() {
             args.suggestionCategory?.let { setCategorySelection(it) }
             args.suggestionType?.let { 
                 setTypeSelection(it)
-                // Pre-fill default parameters based on type
                 prefillDefaultParameters(it)
             }
-            updatePreview()
         }
     }
 
@@ -261,26 +378,25 @@ class AddEditHabitFragment : Fragment() {
         
         when (type) {
             HabitType.MOTION -> {
-                // Pre-fill motion type and duration for motion-based habits
-                binding.actvMotionType.setText("Walk", false)
-                binding.etDuration.setText("30")
+                binding.chipWalk.isChecked = true
+                binding.chipDuration30.isChecked = true
             }
             HabitType.LOCATION -> {
-                // Pre-fill radius for location-based habits
-                binding.etRadius.setText("100")
+                selectedRadius = 100f
             }
             HabitType.TIME -> {
-                // Time-based habits don't need default pre-fills
-                // User can add reminder times and days
+                // Default to every day
+                binding.chipEveryDay.isChecked = true
             }
         }
     }
 
     private fun setCategorySelection(raw: String) {
-        val index = HabitCategory.values().indexOfFirst { it.name.equals(raw, ignoreCase = true) }
-        if (index >= 0) {
-            binding.spinnerCategory.setSelection(index)
-        }
+        val category = HabitCategory.values().firstOrNull { 
+            it.name.equals(raw, ignoreCase = true) 
+        } ?: return
+        
+        selectCategory(category)
     }
 
     private fun setTypeSelection(raw: String) {
@@ -290,42 +406,68 @@ class AddEditHabitFragment : Fragment() {
             "location", "location-based", "location_based" -> HabitType.LOCATION
             else -> HabitType.TIME
         }
-        when (type) {
-            HabitType.TIME -> binding.chipGroupType.check(binding.chipTime.id)
-            HabitType.MOTION -> binding.chipGroupType.check(binding.chipMotion.id)
-            HabitType.LOCATION -> binding.chipGroupType.check(binding.chipLocation.id)
-        }
-        toggleSections(type)
+        selectType(type)
     }
 
-    private fun toggleSections(type: HabitType) = with(binding) {
-        sectionTime.isVisible = type == HabitType.TIME
-        sectionMotion.isVisible = type == HabitType.MOTION
-        sectionLocation.isVisible = type == HabitType.LOCATION
+    private fun currentType(): HabitType {
+        // Check which section is visible
+        return when {
+            binding.sectionTime.isVisible -> HabitType.TIME
+            binding.sectionMotion.isVisible -> HabitType.MOTION
+            binding.sectionLocation.isVisible -> HabitType.LOCATION
+            else -> HabitType.TIME
+        }
+    }
+
+    private fun currentCategory(): HabitCategory = when {
+        binding.btnCategoryFitness.isSelected -> HabitCategory.FITNESS
+        binding.btnCategoryWellness.isSelected -> HabitCategory.WELLNESS
+        binding.btnCategoryProductivity.isSelected -> HabitCategory.PRODUCTIVITY
+        binding.btnCategoryLearning.isSelected -> HabitCategory.LEARNING
+        else -> HabitCategory.FITNESS // Default to Fitness
     }
 
     private fun attemptSave() {
         val type = currentType()
         val name = binding.etHabitName.text?.toString()?.trim().orEmpty()
-        val category = HabitCategory.values()[binding.spinnerCategory.selectedItemPosition]
-        val motionType = binding.actvMotionType.text?.toString()?.trim()
-        val duration = binding.etDuration.text?.toString()?.toIntOrNull()
-        val radius = binding.etRadius.text?.toString()?.toFloatOrNull()
+        val category = currentCategory()
 
         binding.tilHabitName.error = if (name.isBlank()) getString(R.string.error_required) else null
 
         if (type == HabitType.MOTION) {
-            binding.tilMotionType.error = if (motionType.isNullOrBlank()) getString(R.string.error_required) else null
-            binding.tilDuration.error = if (duration == null || duration <= 0) getString(R.string.error_positive_number) else null
-        } else {
-            binding.tilMotionType.error = null
-            binding.tilDuration.error = null
+            if (selectedMotionType.isNullOrBlank()) {
+                showError("Please select a motion type")
+                return
+            }
+            if (selectedDuration == null || selectedDuration!! <= 0) {
+                showError("Please select a duration")
+                return
+            }
         }
 
         if (type == HabitType.LOCATION) {
-            binding.tilRadius.error = if (radius == null || radius <= 0f) getString(R.string.error_positive_number) else null
-        } else {
-            binding.tilRadius.error = null
+            if (selectedLocation == null) {
+                showError("Please select a location")
+                return
+            }
+            // Get radius from input if visible, otherwise use default
+            val radiusInput = binding.etRadius.text?.toString()?.toFloatOrNull()
+            selectedRadius = if (radiusInput != null && radiusInput > 0f) {
+                radiusInput
+            } else {
+                100f // Default
+            }
+        }
+
+        if (type == HabitType.TIME) {
+            if (reminderTimes.isEmpty()) {
+                showError("Please select at least one reminder time")
+                return
+            }
+            if (selectedDays.isEmpty()) {
+                showError("Please select at least one day")
+                return
+            }
         }
 
         val validation = viewModel.validateForm(
@@ -333,10 +475,10 @@ class AddEditHabitFragment : Fragment() {
             type = type,
             reminderTimes = if (type == HabitType.TIME) reminderTimes.toList() else emptyList(),
             reminderDays = if (type == HabitType.TIME) selectedDays.sorted() else emptyList(),
-            motionType = if (type == HabitType.MOTION) motionType else null,
-            duration = if (type == HabitType.MOTION) duration else null,
+            motionType = if (type == HabitType.MOTION) selectedMotionType else null,
+            duration = if (type == HabitType.MOTION) selectedDuration else null,
             hasLocation = if (type == HabitType.LOCATION) selectedLocation != null else true,
-            radius = if (type == HabitType.LOCATION) radius else null
+            radius = if (type == HabitType.LOCATION) selectedRadius else null
         )
 
         if (!validation.isValid) {
@@ -350,42 +492,75 @@ class AddEditHabitFragment : Fragment() {
             category = category,
             type = type,
             reminderTimes = if (type == HabitType.TIME) reminderTimes.toList() else null,
-            reminderDays = if (type == HabitType.TIME) selectedDays.sorted() else null,
-            motionType = if (type == HabitType.MOTION) motionType else null,
-            targetDuration = if (type == HabitType.MOTION) duration else null,
+            reminderDays = if (type == HabitType.TIME) selectedDays.sorted() else emptyList(),
+            motionType = if (type == HabitType.MOTION) selectedMotionType else null,
+            targetDuration = if (type == HabitType.MOTION) selectedDuration else null,
             location = if (type == HabitType.LOCATION) selectedLocation else null,
-            geofenceRadius = if (type == HabitType.LOCATION) radius else null
+            geofenceRadius = if (type == HabitType.LOCATION) selectedRadius else null
         )
     }
 
     private fun populateForm(habit: Habit) = with(binding) {
-        tvTitle.text = getString(R.string.edit_habit)
+        toolbar.title = getString(R.string.edit_habit)
         etHabitName.setText(habit.name)
-        spinnerCategory.setSelection(habit.category.ordinal)
+        
+        // Set category
+        selectCategory(habit.category)
+        
+        // Set type
+        selectType(habit.type)
 
-        when (habit.type) {
-            HabitType.TIME -> chipGroupType.check(chipTime.id)
-            HabitType.MOTION -> chipGroupType.check(chipMotion.id)
-            HabitType.LOCATION -> chipGroupType.check(chipLocation.id)
+        // Populate time-based fields
+        if (habit.type == HabitType.TIME) {
+            reminderTimes.clear()
+            habit.reminderTimes?.let { reminderTimes.addAll(it) }
+            
+            selectedDays.clear()
+            habit.reminderDays?.let { selectedDays.addAll(it) }
+            setDaySelections(selectedDays)
+            
+            if (selectedDays.size == 7) {
+                binding.chipEveryDay.isChecked = true
+            }
         }
-        toggleSections(habit.type)
 
-        reminderTimes.clear()
-        habit.reminderTimes?.let { reminderTimes.addAll(it) }
-        renderReminderTimeChips()
+        // Populate motion-based fields
+        if (habit.type == HabitType.MOTION) {
+            when (habit.motionType?.lowercase()) {
+                "walk" -> binding.chipWalk.isChecked = true
+                "run" -> binding.chipRun.isChecked = true
+                "stationary" -> binding.chipStationary.isChecked = true
+            }
+            
+            habit.targetDuration?.let { duration ->
+                selectedDuration = duration
+                when (duration) {
+                    10 -> binding.chipDuration10.isChecked = true
+                    20 -> binding.chipDuration20.isChecked = true
+                    30 -> binding.chipDuration30.isChecked = true
+                    60 -> binding.chipDuration60.isChecked = true
+                }
+            }
+        }
 
-        selectedDays.clear()
-        habit.reminderDays?.let { selectedDays.addAll(it) }
-        setDaySelections(selectedDays)
-
-        actvMotionType.setText(habit.motionType ?: "", false)
-        etDuration.setText(habit.targetDuration?.toString() ?: "")
-
-        selectedLocation = habit.location
-        tvLocationAddress.text = habit.location?.address ?: getString(R.string.no_location_selected)
-        etRadius.setText(habit.geofenceRadius?.toString() ?: "")
-
-        updatePreview()
+        // Populate location-based fields
+        if (habit.type == HabitType.LOCATION) {
+            selectedLocation = habit.location
+            binding.tvLocationAddress.text = habit.location?.address ?: getString(R.string.no_location_selected)
+            selectedRadius = habit.geofenceRadius ?: 100f
+            
+            // Check preset chips if location matches
+            when (habit.location?.address?.lowercase()) {
+                "home" -> binding.chipLocationHome.isChecked = true
+                "gym" -> binding.chipLocationGym.isChecked = true
+                "work" -> binding.chipLocationWork.isChecked = true
+                else -> {
+                    // Custom location - show radius input
+                    binding.tilRadius.visibility = View.VISIBLE
+                    binding.etRadius.setText(selectedRadius?.toInt().toString())
+                }
+            }
+        }
     }
 
     private fun setDaySelections(days: Set<Int>) {
@@ -403,61 +578,10 @@ class AddEditHabitFragment : Fragment() {
         }
     }
 
-    private fun currentType(): HabitType = when (binding.chipGroupType.checkedChipId) {
-        binding.chipMotion.id -> HabitType.MOTION
-        binding.chipLocation.id -> HabitType.LOCATION
-        else -> HabitType.TIME
+    private fun updatePreview() {
+        // Preview removed for minimalistic design
+        // Can be added back if needed
     }
-
-    private fun updatePreview() = with(binding) {
-        val name = etHabitName.text?.toString().takeIf { !it.isNullOrBlank() } ?: getString(R.string.habit_name_placeholder)
-        tvPreviewName.text = name
-
-        val type = currentType()
-        val typeLabel = when (type) {
-            HabitType.TIME -> getString(R.string.time_based)
-            HabitType.MOTION -> getString(R.string.motion_based)
-            HabitType.LOCATION -> getString(R.string.location_based)
-        }
-        val category = HabitCategory.values()[spinnerCategory.selectedItemPosition].displayName()
-        tvPreviewType.text = getString(R.string.preview_type_format, typeLabel, category)
-
-        tvPreviewDetails.text = when (type) {
-            HabitType.TIME -> {
-                val timesText = if (reminderTimes.isEmpty()) getString(R.string.preview_no_times)
-                else reminderTimes.sorted().joinToString { it.format(timeFormatter) }
-                val daysText = if (selectedDays.isEmpty()) getString(R.string.preview_no_days)
-                else selectedDays.sorted().joinToString { dayNameShort(it) }
-                getString(R.string.preview_time_details, timesText, daysText)
-            }
-
-            HabitType.MOTION -> {
-                val motion = binding.actvMotionType.text?.toString().takeIf { !it.isNullOrBlank() }
-                    ?: getString(R.string.preview_no_motion)
-                val duration = binding.etDuration.text?.toString()?.toIntOrNull()
-                getString(R.string.preview_motion_details, motion, duration ?: 0)
-            }
-
-            HabitType.LOCATION -> {
-                val address = selectedLocation?.address ?: getString(R.string.preview_no_location)
-                val radius = binding.etRadius.text?.toString()?.toFloatOrNull() ?: 0f
-                getString(R.string.preview_location_details, address, radius)
-            }
-        }
-    }
-
-    private fun dayNameShort(day: Int): String = when (day) {
-        1 -> getString(R.string.monday_short)
-        2 -> getString(R.string.tuesday_short)
-        3 -> getString(R.string.wednesday_short)
-        4 -> getString(R.string.thursday_short)
-        5 -> getString(R.string.friday_short)
-        6 -> getString(R.string.saturday_short)
-        else -> getString(R.string.sunday_short)
-    }
-
-    private fun HabitCategory.displayName(): String =
-        name.lowercase().replaceFirstChar { it.uppercase() }
 
     private fun attemptDelete() {
         val habitId = args.habitId

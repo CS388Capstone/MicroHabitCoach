@@ -46,11 +46,18 @@ class ExploreFragment : Fragment() {
 
     private fun setupPullToRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
-            viewModel.loadSuggestions()
+            // Force refresh from API on pull-to-refresh
+            viewModel.refreshSuggestions()
         }
     }
 
     private fun observeViewModel() {
+        // Observe suggestions list
+        viewModel.suggestions.observe(viewLifecycleOwner) { suggestions ->
+            // TODO: Update RecyclerView adapter with suggestions
+            // For now, suggestions are automatically updated via LiveData
+        }
+
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.isVisible = isLoading
             binding.swipeRefreshLayout.isRefreshing = isLoading

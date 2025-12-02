@@ -17,6 +17,9 @@ interface HabitDao {
     @Query("SELECT * FROM habits WHERE isActive = 1 ORDER BY createdAt DESC")
     fun getAllHabits(): Flow<List<Habit>>
     
+    @Query("SELECT * FROM habits WHERE isActive = 1 ORDER BY createdAt DESC")
+    suspend fun getAllHabitsSync(): List<Habit>
+    
     @Query("SELECT * FROM habits WHERE id = :id")
     suspend fun getHabitById(id: String): Habit?
     

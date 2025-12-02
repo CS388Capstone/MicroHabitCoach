@@ -9,6 +9,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.microhabitcoach.R
 import com.microhabitcoach.data.database.DatabaseModule
 import com.microhabitcoach.databinding.ActivityMainBinding
+import com.microhabitcoach.notification.NotificationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,6 +27,9 @@ class MainActivity : AppCompatActivity() {
         
         // Setup navigation
         setupNavigation()
+        
+        // Initialize notification service
+        NotificationService.initialize(this)
         
         // Test database connection
         testDatabase()

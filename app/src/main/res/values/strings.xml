@@ -133,6 +133,8 @@
     <string name="notification_inactivity_message">You\'ve been still for 2 hours. Time for a quick activity break?</string>
     <string name="notification_geofence_title">%1$s reminder</string>
     <string name="notification_geofence_message">You\'re at the location for %1$s. Don\'t forget to complete it!</string>
+    <string name="notification_reminder_title">Time for %1$s</string>
+    <string name="notification_reminder_message">Don\'t forget to complete your habit: %1$s</string>
     
     <string name="mark_done">Mark Done</string>
     <string name="snooze">Snooze</string>

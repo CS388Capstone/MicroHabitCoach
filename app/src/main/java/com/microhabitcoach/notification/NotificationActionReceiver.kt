@@ -53,11 +53,14 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     HabitNotificationManager.getInstance(context).cancelNotification(notificationId)
                 }
                 
-                // Schedule a new notification in 30 minutes
+                // Schedule a new notification
                 scope.launch {
                     when (type) {
                         NotificationType.STREAK_COUNTDOWN.name -> {
                             StreakCountdownWorker.scheduleSnoozedNotification(context, habitId)
+                        }
+                        NotificationType.REMINDER.name -> {
+                            HabitReminderWorker.scheduleSnoozedReminder(context, habitId)
                         }
                         NotificationType.GEOFENCE.name -> {
                             // For geofence, we don't snooze - just cancel

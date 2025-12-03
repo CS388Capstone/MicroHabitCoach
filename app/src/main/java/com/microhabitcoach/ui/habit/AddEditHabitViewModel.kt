@@ -13,6 +13,7 @@ import com.microhabitcoach.data.model.HabitType
 import com.microhabitcoach.data.model.LocationData
 import com.microhabitcoach.data.repository.DefaultHabitRepository
 import com.microhabitcoach.data.repository.HabitRepository
+import com.microhabitcoach.notification.ReminderScheduler
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.util.UUID
@@ -107,6 +108,10 @@ class AddEditHabitViewModel(
 
                 repository.saveHabit(habit)
                 _habit.value = habit
+                
+                // Schedule reminder notifications for time-based habits
+                ReminderScheduler.rescheduleHabitReminders(application, habit)
+                
                 _saveState.value = SaveState.Success
             } catch (t: Throwable) {
                 _saveState.value = SaveState.Error(t.message ?: "Failed to save habit")
@@ -119,6 +124,10 @@ class AddEditHabitViewModel(
         viewModelScope.launch {
             try {
                 _saveState.value = SaveState.Saving
+                
+                // Cancel reminder notifications before deleting
+                ReminderScheduler.cancelHabitReminders(application, id)
+                
                 repository.deleteHabit(id)
                 _habit.value = null
                 _saveState.value = SaveState.Success

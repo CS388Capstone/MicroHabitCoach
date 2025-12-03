@@ -3,6 +3,7 @@ package com.microhabitcoach.notification
 import android.content.Context
 import com.microhabitcoach.activity.ActivityRecognitionService
 import com.microhabitcoach.activity.ActivityRecognitionWorker
+import com.microhabitcoach.geofence.GeofenceService
 
 /**
  * Service to initialize and manage all notification-related workers.
@@ -24,6 +25,9 @@ object NotificationService {
         
         // Start activity recognition monitoring
         ActivityRecognitionService.startMonitoring(context)
+        
+        // Initialize geofences (refresh from database)
+        GeofenceService.updateGeofences(context)
     }
     
     /**
@@ -31,6 +35,8 @@ object NotificationService {
      */
     fun cancelAll(context: Context) {
         androidx.work.WorkManager.getInstance(context).cancelAllWork()
+        ActivityRecognitionService.stopMonitoring(context)
+        GeofenceService.removeAllGeofences(context)
     }
 }
 

@@ -41,6 +41,14 @@
         <receiver
             android:name=".activity.ActivityTransitionReceiver"
             android:exported="false" />
+        
+        <receiver
+            android:name=".geofence.GeofenceBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.location.GeofenceTransition" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

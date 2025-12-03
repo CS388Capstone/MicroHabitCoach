@@ -13,6 +13,7 @@ import com.microhabitcoach.data.model.HabitType
 import com.microhabitcoach.data.model.LocationData
 import com.microhabitcoach.data.repository.DefaultHabitRepository
 import com.microhabitcoach.data.repository.HabitRepository
+import com.microhabitcoach.geofence.GeofenceService
 import com.microhabitcoach.notification.ReminderScheduler
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -112,6 +113,14 @@ class AddEditHabitViewModel(
                 // Schedule reminder notifications for time-based habits
                 ReminderScheduler.rescheduleHabitReminders(application, habit)
                 
+                // Create/update geofence for location-based habits
+                if (habit.type == HabitType.LOCATION && habit.location != null && habit.geofenceRadius != null) {
+                    GeofenceService.addGeofence(application, habit)
+                } else if (existingHabit?.type == HabitType.LOCATION && habit.type != HabitType.LOCATION) {
+                    // Habit type changed from LOCATION to something else - remove geofence
+                    GeofenceService.removeGeofence(application, habit.id)
+                }
+                
                 _saveState.value = SaveState.Success
             } catch (t: Throwable) {
                 _saveState.value = SaveState.Error(t.message ?: "Failed to save habit")
@@ -127,6 +136,9 @@ class AddEditHabitViewModel(
                 
                 // Cancel reminder notifications before deleting
                 ReminderScheduler.cancelHabitReminders(application, id)
+                
+                // Remove geofence before deleting
+                GeofenceService.removeGeofence(application, id)
                 
                 repository.deleteHabit(id)
                 _habit.value = null

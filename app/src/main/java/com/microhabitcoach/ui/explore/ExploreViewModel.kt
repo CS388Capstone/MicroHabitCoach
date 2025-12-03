@@ -1,23 +1,33 @@
 package com.microhabitcoach.ui.explore
 
-import android.app.Application
+import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
+import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
+import com.microhabitcoach.R
+import com.microhabitcoach.activity.ActivityDurationTracker
 import com.microhabitcoach.data.database.DatabaseModule
 import com.microhabitcoach.data.database.entity.ApiSuggestion
 import com.microhabitcoach.data.database.entity.UserPreferences
 import com.microhabitcoach.data.model.HabitCategory
 import com.microhabitcoach.data.model.MotionState
-import com.microhabitcoach.activity.ActivityDurationTracker
+import com.microhabitcoach.data.model.Weather
+import com.microhabitcoach.data.model.WeatherCondition
 import com.microhabitcoach.data.model.UserContext
 import com.microhabitcoach.data.repository.ApiRepository
+import com.microhabitcoach.data.repository.WeatherRepository
 import com.microhabitcoach.data.util.FitScoreCalculator
 import com.microhabitcoach.data.util.HabitClassifier
+import com.microhabitcoach.ui.explore.WeatherImpactType
+import com.microhabitcoach.ui.explore.WeatherUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,7 +35,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.time.LocalTime
+import kotlin.coroutines.resume
+import kotlin.math.roundToInt
 
 class ExploreViewModel(
     application: Application
@@ -35,6 +48,8 @@ class ExploreViewModel(
     private val apiRepository = ApiRepository(database)
     private val apiSuggestionDao = database.apiSuggestionDao()
     private val userPreferencesDao = database.userPreferencesDao()
+    private val weatherRepository = WeatherRepository()
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(application)
 
     // LiveData observables
     private val _suggestions = MutableLiveData<List<ApiSuggestion>>(emptyList())
@@ -45,6 +60,9 @@ class ExploreViewModel(
 
     private val _error = MutableLiveData<String?>(null)
     val error: LiveData<String?> = _error
+
+    private val _weatherState = MutableLiveData<WeatherUiState>()
+    val weatherState: LiveData<WeatherUiState> = _weatherState
 
     // Cache refresh settings
     private val CACHE_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000L // 6 hours
@@ -112,9 +130,19 @@ class ExploreViewModel(
                     )
                 }
                 
-                // If we have fresh cached data, use it
+                // If we have fresh cached data, use it (but still refresh weather/context)
                 if (cachedSuggestions.isNotEmpty()) {
+                    // Update suggestions from cache
+                    _suggestions.value = cachedSuggestions
                     _isLoading.value = false
+                    
+                    // Build context in background to update weather banner even when using cache
+                    viewModelScope.launch {
+                        try {
+                            buildUserContext()
+                        } catch (_: Exception) {
+                        }
+                    }
                     return@launch
                 }
                 
@@ -196,15 +224,18 @@ class ExploreViewModel(
                         // Log top suggestions by FitScore
                         android.util.Log.d("ExploreViewModel", "Top 20 FitScores (sorted):")
                         processedSuggestions.take(20).forEachIndexed { index, suggestion ->
-                            android.util.Log.d("ExploreViewModel", "  ${index + 1}. [${suggestion.fitScore}] [${suggestion.source}] ${suggestion.title.take(45)} (${suggestion.category})")
+                            val safeTitle = (suggestion.title ?: "").take(45)
+                            android.util.Log.d("ExploreViewModel", "  ${index + 1}. [${suggestion.fitScore}] [${suggestion.source}] $safeTitle (${suggestion.category})")
                         }
                         
-                        // Take top 10 by FitScore for display
-                        val topSuggestions = processedSuggestions.take(10)
+                        // Take top N by FitScore for display/caching
+                        // We cache more than we initially show so "Load more" can reveal lower FitScores.
+                        val topSuggestions = processedSuggestions.take(50)
                         
                         android.util.Log.d("ExploreViewModel", "=== TOP 10 SELECTED ===")
                         topSuggestions.forEachIndexed { index, suggestion ->
-                            android.util.Log.d("ExploreViewModel", "  ${index + 1}. [${suggestion.fitScore}] [${suggestion.source}] ${suggestion.title.take(50)}")
+                            val safeTitle = (suggestion.title ?: "").take(50)
+                            android.util.Log.d("ExploreViewModel", "  ${index + 1}. [${suggestion.fitScore}] [${suggestion.source}] $safeTitle")
                         }
                         android.util.Log.d("ExploreViewModel", "========================")
                         
@@ -213,7 +244,7 @@ class ExploreViewModel(
                             // Clear ALL old suggestions to get fresh data on refresh
                             apiSuggestionDao.deleteAllSuggestions()
                             
-                            // Insert top 10 suggestions for display
+                            // Insert top suggestions for display
                             if (topSuggestions.isNotEmpty()) {
                                 apiRepository.cacheSuggestions(topSuggestions)
                             }
@@ -305,12 +336,13 @@ class ExploreViewModel(
         
         return rawSuggestions.map { suggestion ->
             // Classify if not already classified (for raw API data)
-            val category = if (suggestion.category == HabitCategory.GENERAL && 
-                               suggestion.title.isNotEmpty()) {
-                HabitClassifier.classify(suggestion.title, suggestion.content)
-            } else {
-                suggestion.category
-            }
+            val existingCategory = suggestion.category ?: HabitCategory.GENERAL
+            val category =
+                if (existingCategory == HabitCategory.GENERAL && !suggestion.title.isNullOrEmpty()) {
+                    HabitClassifier.classify(suggestion.title ?: "", suggestion.content)
+                } else {
+                    existingCategory
+                }
             
             // Create suggestion with category
             val categorizedSuggestion = suggestion.copy(category = category)
@@ -342,16 +374,21 @@ class ExploreViewModel(
         // Get current time
         val currentTime = LocalTime.now()
         
-        // TODO: Get current location from LocationManager/FusedLocationProvider
-        // For now, we'll use null (location is optional)
-        val currentLocation: Location? = null
+        val (currentLocation, hasLocationPermission) = getLastKnownLocation()
         
         // Get recent motion state from ActivityDurationTracker
-        ActivityDurationTracker.initialize(context)
+        ActivityDurationTracker.initialize(getApplication())
         val motionState = ActivityDurationTracker.getCurrentMotionState()
         
-        // TODO: Get current weather (optional for MVP)
-        val currentWeather = null
+        val currentWeather = if (currentLocation != null) {
+            weatherRepository.getWeather(
+                latitude = currentLocation.latitude,
+                longitude = currentLocation.longitude
+            )
+        } else {
+            null
+        }
+        updateWeatherUiState(currentWeather, hasLocationPermission)
         
         return UserContext(
             preferredCategories = preferences.preferredCategories,
@@ -360,6 +397,43 @@ class ExploreViewModel(
             recentMotionState = motionState,
             currentWeather = currentWeather
         )
+    }
+
+    private suspend fun getLastKnownLocation(): Pair<Location?, Boolean> {
+        val context = getApplication<Application>()
+        val hasFineLocation = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasCoarseLocation = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasFineLocation && !hasCoarseLocation) {
+            android.util.Log.d("ExploreViewModel", "Location permission not granted, skipping location/weather fetch.")
+            return null to false
+        }
+
+        return suspendCancellableCoroutine { continuation ->
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (continuation.isActive) {
+                        continuation.resume(location to true)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    android.util.Log.e("ExploreViewModel", "Failed to get location: ${exception.message}", exception)
+                    if (continuation.isActive) {
+                        continuation.resume(null to true)
+                    }
+                }
+                .addOnCanceledListener {
+                    if (continuation.isActive) {
+                        continuation.resume(null to true)
+                    }
+                }
+        }
     }
 
     /**
@@ -374,6 +448,77 @@ class ExploreViewModel(
                 refreshSuggestions()
             }
         }
+    }
+
+    private fun updateWeatherUiState(weather: Weather?, hasLocationPermission: Boolean) {
+        val context = getApplication<Application>()
+        val uiState = when {
+            !hasLocationPermission -> WeatherUiState(
+                isAvailable = false,
+                conditionText = context.getString(R.string.weather_unavailable_title),
+                temperatureText = null,
+                impactMessage = context.getString(R.string.weather_permission_message),
+                impactType = WeatherImpactType.NEUTRAL
+            )
+            weather == null -> WeatherUiState(
+                isAvailable = false,
+                conditionText = context.getString(R.string.weather_unavailable_title),
+                temperatureText = null,
+                impactMessage = context.getString(R.string.weather_unavailable_message),
+                impactType = WeatherImpactType.NEUTRAL
+            )
+            else -> {
+                val conditionLabel = getWeatherConditionLabel(weather, context)
+                val temperatureText = weather.temperature?.let { formatTemperature(context, it) }
+                val (impactType, impactMessage) = when {
+                    isGreatWeatherForOutdoors(weather) -> WeatherImpactType.POSITIVE to context.getString(R.string.weather_positive_message)
+                    isBadOutdoorWeather(weather) -> WeatherImpactType.NEGATIVE to context.getString(R.string.weather_negative_message)
+                    else -> WeatherImpactType.NEUTRAL to context.getString(R.string.weather_neutral_message)
+                }
+                WeatherUiState(
+                    isAvailable = true,
+                    conditionText = conditionLabel,
+                    temperatureText = temperatureText,
+                    impactMessage = impactMessage,
+                    impactType = impactType
+                )
+            }
+        }
+        _weatherState.postValue(uiState)
+    }
+
+    private fun getWeatherConditionLabel(weather: Weather, context: Application): String {
+        return when (weather.condition) {
+            WeatherCondition.SUNNY -> context.getString(R.string.weather_condition_sunny)
+            WeatherCondition.CLOUDY -> context.getString(R.string.weather_condition_cloudy)
+            WeatherCondition.RAINY -> context.getString(R.string.weather_condition_rainy)
+            WeatherCondition.SNOWY -> context.getString(R.string.weather_condition_snowy)
+            WeatherCondition.WINDY -> context.getString(R.string.weather_condition_windy)
+            else -> context.getString(R.string.weather_condition_unknown)
+        }
+    }
+
+    private fun formatTemperature(context: Application, celsius: Double): String {
+        val fahrenheit = (celsius * 9 / 5) + 32
+        return context.getString(
+            R.string.weather_temp_format,
+            celsius.roundToInt(),
+            fahrenheit.roundToInt()
+        )
+    }
+
+    private fun isGreatWeatherForOutdoors(weather: Weather): Boolean {
+        val pleasantCondition = weather.condition == WeatherCondition.SUNNY || weather.condition == WeatherCondition.CLOUDY
+        val temp = weather.temperature
+        return pleasantCondition && (temp == null || temp in 8.0..28.0)
+    }
+
+    private fun isBadOutdoorWeather(weather: Weather): Boolean {
+        return weather.condition in listOf(
+            WeatherCondition.RAINY,
+            WeatherCondition.SNOWY,
+            WeatherCondition.WINDY
+        )
     }
 
     /**

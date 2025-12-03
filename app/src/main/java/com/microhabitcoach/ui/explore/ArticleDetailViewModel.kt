@@ -181,10 +181,10 @@ class ArticleDetailViewModel(
     private fun convertToSavedArticle(suggestion: ApiSuggestion): SavedArticle {
         return SavedArticle(
             id = suggestion.id,
-            title = suggestion.title,
+            title = suggestion.title ?: "",
             description = suggestion.content,
             content = suggestion.content,
-            source = suggestion.source,
+            source = suggestion.source ?: "",
             sourceUrl = suggestion.sourceUrl,
             imageUrl = suggestion.imageUrl,
             author = suggestion.author,
@@ -233,7 +233,7 @@ class ArticleDetailViewModel(
             !suggestion.sourceName.isNullOrBlank() -> suggestion.sourceName!!
             suggestion.source == "hacker_news" -> "Hacker News"
             suggestion.source == "news_api" -> "News API"
-            else -> suggestion.source.replace("_", " ").replaceFirstChar { it.uppercase() }
+            else -> (suggestion.source ?: "").replace("_", " ").replaceFirstChar { it.uppercase() }
         }
     }
 

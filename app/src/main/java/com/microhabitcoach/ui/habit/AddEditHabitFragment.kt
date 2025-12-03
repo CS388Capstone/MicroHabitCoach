@@ -457,7 +457,12 @@ class AddEditHabitFragment : Fragment() {
     }
 
     private fun HabitCategory.displayName(): String =
-        name.lowercase().replaceFirstChar { it.uppercase() }
+        when (this) {
+            HabitCategory.HEALTHY_EATING -> "Healthy Eating"
+            else -> name.lowercase().replace("_", " ").split(" ").joinToString(" ") { word ->
+                word.replaceFirstChar { it.uppercase() }
+            }
+        }
 
     private fun attemptDelete() {
         val habitId = args.habitId

@@ -238,7 +238,20 @@ object HabitAnalytics {
         // Create data for each day in the last 30 days
         val calendarData = mutableListOf<CalendarDayData>()
         var currentDay = getDayStart(thirtyDaysAgo)
+        val firstDayOfWeek = getDayOfWeek(currentDay) // 1 = Mon ... 7 = Sun
         val today = getDayStart(now)
+        
+        // Add leading placeholders so the first real day aligns with its weekday column
+        repeat(firstDayOfWeek - 1) {
+            calendarData.add(
+                CalendarDayData(
+                    date = 0L,
+                    hasCompletion = false,
+                    completion = null,
+                    isPlaceholder = true
+                )
+            )
+        }
         
         while (currentDay <= today) {
             val dayCompletions = completionsByDay[currentDay]
@@ -252,7 +265,8 @@ object HabitAnalytics {
             currentDay = getNextDay(currentDay)
         }
         
-        return calendarData.reversed() // Most recent first
+        // Keep chronological order (oldest to newest) so weekdays line up with header
+        return calendarData
     }
     
     // Helper functions

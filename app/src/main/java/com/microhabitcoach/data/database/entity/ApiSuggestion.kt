@@ -11,12 +11,12 @@ import com.microhabitcoach.data.model.HabitCategory
 )
 data class ApiSuggestion(
     @PrimaryKey
-    val id: String, // Can be Hacker News item ID or generated UUID
-    val title: String,
+    val id: String,
+    val title: String?,
     val content: String? = null,
-    val source: String, // "hacker_news" or "news_api"
+    val source: String?,
     val sourceUrl: String? = null,
-    val category: HabitCategory,
+    val category: HabitCategory?,
     val fitScore: Int, // 0-100
     val cachedAt: Long = System.currentTimeMillis(),
     val expiresAt: Long? = null, // Optional expiration time
@@ -28,4 +28,3 @@ data class ApiSuggestion(
     val score: Int? = null, // Upvotes from Hacker News
     val commentCount: Int? = null // Comment count from Hacker News
 )
-

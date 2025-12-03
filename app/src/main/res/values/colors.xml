@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="weather_positive_bg">#E8F5E9</color>
+    <color name="weather_positive_text">#1B5E20</color>
+    <color name="weather_negative_bg">#FFEBEE</color>
+    <color name="weather_negative_text">#B71C1C</color>
+    <color name="weather_neutral_bg">#ECEFF1</color>
+    <color name="weather_neutral_text">#37474F</color>
+</resources>
+

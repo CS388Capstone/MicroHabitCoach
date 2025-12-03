@@ -94,7 +94,7 @@ class TodayViewModel(
         viewModelScope.launch {
             try {
                 // Cancel reminder notifications before deleting
-                ReminderScheduler.cancelHabitReminders(application, id)
+                ReminderScheduler.cancelHabitReminders(getApplication(), id)
                 
                 repository.deleteHabit(id)
             } catch (t: Throwable) {

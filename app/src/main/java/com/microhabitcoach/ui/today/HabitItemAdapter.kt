@@ -144,6 +144,7 @@ class HabitItemAdapter(
             return when (category) {
                 HabitCategory.FITNESS -> android.R.drawable.ic_menu_compass
                 HabitCategory.WELLNESS -> android.R.drawable.ic_menu_agenda
+                HabitCategory.HEALTHY_EATING -> android.R.drawable.ic_menu_recent_history // Using recent history icon for healthy eating
                 HabitCategory.PRODUCTIVITY -> android.R.drawable.ic_menu_edit
                 HabitCategory.LEARNING -> android.R.drawable.ic_menu_view
                 HabitCategory.GENERAL -> android.R.drawable.ic_menu_agenda
@@ -198,5 +199,10 @@ private fun HabitType.displayName(): String = when (this) {
 }
 
 private fun HabitCategory.displayName(): String =
-    name.lowercase().replaceFirstChar { it.uppercase() }
+    when (this) {
+        HabitCategory.HEALTHY_EATING -> "Healthy Eating"
+        else -> name.lowercase().replace("_", " ").split(" ").joinToString(" ") { word ->
+            word.replaceFirstChar { it.uppercase() }
+        }
+    }
 

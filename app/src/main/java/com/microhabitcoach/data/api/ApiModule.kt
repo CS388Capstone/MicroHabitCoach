@@ -15,6 +15,7 @@ object ApiModule {
     
     private const val HACKER_NEWS_BASE_URL = "https://hacker-news.firebaseio.com/v0/"
     private const val NEWS_API_BASE_URL = "https://newsapi.org/v2/"
+    private const val OPEN_WEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/"
     
     // News API key loaded from BuildConfig (which reads from local.properties)
     val NEWS_API_KEY: String = try {
@@ -54,6 +55,12 @@ object ApiModule {
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
     
+    private val weatherRetrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(OPEN_WEATHER_BASE_URL)
+        .client(okHttpClient)
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+    
     /**
      * Provides Hacker News API service instance.
      */
@@ -63,5 +70,10 @@ object ApiModule {
      * Provides News API service instance.
      */
     val newsApi: NewsApi = newsApiRetrofit.create(NewsApi::class.java)
+    
+    /**
+     * Provides OpenWeather API service instance.
+     */
+    val weatherApi: WeatherApi = weatherRetrofit.create(WeatherApi::class.java)
 }
 

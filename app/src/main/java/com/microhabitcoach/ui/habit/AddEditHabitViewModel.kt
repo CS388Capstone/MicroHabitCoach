@@ -110,7 +110,7 @@ class AddEditHabitViewModel(
                 _habit.value = habit
                 
                 // Schedule reminder notifications for time-based habits
-                ReminderScheduler.rescheduleHabitReminders(application, habit)
+                ReminderScheduler.rescheduleHabitReminders(getApplication(), habit)
                 
                 _saveState.value = SaveState.Success
             } catch (t: Throwable) {
@@ -126,7 +126,7 @@ class AddEditHabitViewModel(
                 _saveState.value = SaveState.Saving
                 
                 // Cancel reminder notifications before deleting
-                ReminderScheduler.cancelHabitReminders(application, id)
+                ReminderScheduler.cancelHabitReminders(getApplication(), id)
                 
                 repository.deleteHabit(id)
                 _habit.value = null

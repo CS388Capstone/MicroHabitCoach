@@ -140,13 +140,12 @@ class FitScoreCalculator {
 }
 ```
 
-**Potential Issues**: 
-- ⚠️ **Weather API**: Not required for MVP. Can be:
-  - **Option A**: Make weather optional (score just doesn't add +10 if null) ✅ Recommended
-  - **Option B**: Use free weather API (OpenWeatherMap free tier: 60 calls/min)
-  - **Option C**: Remove weather from FitScore for MVP, add later
-
-**Recommendation**: Make weather optional for MVP. FitScore still works without it.
+**Weather Integration Update**:
+- ✅ Implemented with OpenWeather current weather endpoint
+- ✅ Keys loaded from `local.properties` → `BuildConfig`
+- ✅ Cached per location for 30 minutes to stay within free tier
+- ✅ `ExploreViewModel` fetches last known device location (permission-gated)
+- ✅ `FitScoreCalculator` now boosts indoor habits during bad weather and penalizes outdoor workouts during storms
 
 ---
 

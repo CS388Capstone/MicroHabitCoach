@@ -24,34 +24,61 @@ class ApiRepository(private val database: AppDatabase) {
     private val hackerNewsApi = ApiModule.hackerNewsApi
     private val newsApi = ApiModule.newsApi
     
-    // Keywords to filter relevant posts from Hacker News
-    // Focused on health, fitness, wellness, productivity, and learning
-    // Expanded list to catch more relevant articles from Hacker News
-    private val relevantKeywords = listOf(
-        // Health & Fitness
-        "workout", "exercise", "gym", "run", "walk", "jog", "fitness", "health", "healthy",
-        "cardio", "strength", "training", "bike", "cycling", "swim", "swimming",
-        "yoga", "pilates", "stretch", "hike", "hiking", "sprint", "marathon",
-        "weight", "lifting", "aerobics", "calisthenics", "physical", "activity", "active",
-        "movement", "sport", "sports", "athletic", "endurance", "flexibility",
-        // Wellness & Mental Health
-        "meditation", "meditate", "breath", "breathing", "wellness", "mindfulness",
-        "sleep", "water", "hydrate", "hydration", "relax", "relaxation", "stress",
-        "anxiety", "mental", "self-care", "therapy", "calm", "peace", "zen",
-        "wellbeing", "well-being", "nutrition", "diet", "eating", "food", "meal",
-        "energy", "rest", "recovery", "balance", "lifestyle",
-        // Productivity & Learning
+    private val fitnessKeywords = listOf(
+        "workout", "exercise", "gym", "run", "walk", "jog", "hiit", "fitness", "cardio",
+        "strength", "training", "bike", "cycling", "swim", "swimming", "row", "rowing",
+        "yoga", "pilates", "stretch", "mobility", "hike", "hiking", "sprint", "marathon",
+        "weight", "lifting", "aerobics", "calisthenics", "movement", "sport", "sports",
+        "endurance", "flexibility", "warmup", "cooldown"
+    )
+    
+    private val wellnessKeywords = listOf(
+        "meditation", "meditate", "breathwork", "breathing", "mindfulness", "wellness",
+        "sleep", "hydrate", "hydration", "relax", "relaxation", "stress", "anxiety",
+        "self-care", "therapy", "calm", "mental health", "mindful", "rest", "recovery",
+        "burnout", "gratitude", "journaling"
+    )
+    
+    private val nutritionKeywords = listOf(
+        "healthy eating", "meal prep", "meal-prep", "meal planning", "cooking", "recipes",
+        "recipe", "nutrition", "diet", "foods", "food", "calories", "macros", "protein",
+        "fiber", "plant-based", "mediterranean", "whole foods", "intermittent fasting",
+        "keto", "paleo", "low carb", "gluten-free", "hydration", "smoothie", "breakfast",
+        "lunch", "dinner", "snack", "meal"
+    )
+    
+    private val supplementKeywords = listOf(
+        "supplement", "supplements", "vitamin", "vitamins", "minerals", "omega-3",
+        "omega 3", "creatine", "magnesium", "electrolyte", "protein powder", "collagen",
+        "probiotic", "prebiotic"
+    )
+    
+    private val productivityKeywords = listOf(
         "productivity", "read", "reading", "study", "learn", "learning", "focus",
         "pomodoro", "organize", "plan", "schedule", "task", "goal", "achieve",
-        "complete", "finish", "work", "project", "time management", "efficiency",
-        "optimize", "improve", "develop", "build", "course", "tutorial", "skill",
-        "education", "teach", "knowledge", "research", "explore", "discover",
-        "practice", "master", "expert", "expertise", "technique", "method",
-        "system", "process", "workflow", "automation", "tools", "app", "software",
-        // Self-Improvement
-        "self-improvement", "habit", "habits", "routine", "discipline", "consistency",
-        "motivation", "inspiration", "growth", "development", "progress", "success",
-        "challenge", "commitment", "dedication", "persistence", "resilience"
+        "complete", "finish", "time management", "efficiency", "optimize", "deep work",
+        "ritual", "routine", "habit", "habits", "discipline", "consistency"
+    )
+    
+    private val learningKeywords = listOf(
+        "course", "tutorial", "skill", "education", "teach", "teaching", "knowledge",
+        "research", "explore", "discover", "understand", "master", "expert",
+        "practice", "method", "technique", "study tips", "notes", "memory"
+    )
+    
+    private val healthKeywords = (fitnessKeywords + wellnessKeywords + nutritionKeywords + supplementKeywords).distinct()
+    
+    // Keywords that indicate tech content - articles matching these should be excluded
+    private val exclusionKeywords = listOf(
+        "app", "application", "software", "platform", "saas", "api", "sdk",
+        "code", "programming", "developer", "tech", "technology", "startup",
+        "vc", "venture capital", "funding", "ai model", "llm", "gpt", "chatbot",
+        "machine learning", "artificial intelligence", "blockchain", "crypto",
+        "algorithm", "framework", "library", "repository", "github", "stack",
+        "backend", "frontend", "fullstack", "devops", "cloud", "aws", "azure",
+        "database", "sql", "nosql", "server", "client", "protocol", "http",
+        "javascript", "python", "java", "react", "angular", "vue", "node",
+        "mobile app", "web app", "ios app", "android app", "desktop app"
     )
     
     // LiveData observable
@@ -98,7 +125,7 @@ class ApiRepository(private val database: AppDatabase) {
                     
                     // Combine and deduplicate by title (case-insensitive)
                     val allSuggestions = (hackerNewsSuggestions + newsApiSuggestions)
-                        .distinctBy { it.title.lowercase().trim() }
+                        .distinctBy { (it.title ?: "").lowercase().trim() }
                     
                     // Log classification breakdown by source
                     val hnByCategory = hackerNewsSuggestions.groupBy { it.category }
@@ -186,70 +213,84 @@ class ApiRepository(private val database: AppDatabase) {
     
     /**
      * Fetches suggestions from News API.
-     * Uses multiple targeted queries for better health/wellness/productivity results.
+     * Uses top-headlines with category=health for curated health articles,
+     * plus improved everything queries with negative terms to exclude tech.
      */
     private suspend fun fetchFromNewsApi(): Result<List<ApiSuggestion>> {
         return try {
-            android.util.Log.d("ApiRepository", "Fetching from News API with targeted queries...")
-            
-            // Use multiple targeted queries to get better results for each category
-            // Each query fetches 25 articles, totaling 75 articles
-            val queries = listOf(
-                // Health & Fitness focused query
-                "(health OR fitness OR exercise OR workout OR gym OR running OR yoga OR strength training) AND (habit OR routine OR daily OR practice)",
-                // Wellness & Mental Health focused query
-                "(wellness OR meditation OR mindfulness OR sleep OR stress OR mental health OR self-care) AND (habit OR routine OR daily OR practice)",
-                // Productivity & Learning focused query
-                "(productivity OR time management OR learning OR study OR focus OR pomodoro OR organization) AND (habit OR routine OR daily OR practice)"
-            )
+            android.util.Log.d("ApiRepository", "Fetching from News API with improved queries...")
             
             val allArticles = coroutineScope {
-                queries.mapIndexed { index, query ->
-                    async {
+                val requests = mutableListOf<kotlinx.coroutines.Deferred<List<NewsArticle>>>()
+                
+                // 1. Get top health headlines (curated, high-quality health articles)
+                requests.add(async {
+                    try {
+                        android.util.Log.d("ApiRepository", "News API: Fetching top health headlines...")
+                        val response = newsApi.getTopHeadlines(
+                            category = "health",
+                            apiKey = ApiModule.NEWS_API_KEY,
+                            country = "us",
+                            pageSize = 50
+                        )
+                        android.util.Log.d("ApiRepository", "Top health headlines: status=${response.status}, articles=${response.articles.size}")
+                        if (response.status == "ok") response.articles else emptyList()
+                    } catch (e: Exception) {
+                        android.util.Log.e("ApiRepository", "Top headlines failed: ${e.message}", e)
+                        emptyList()
+                    }
+                })
+                
+                // 2. Improved everything queries with negative terms to exclude tech
+                val queries = listOf(
+                    // Health & Fitness - exclude tech terms
+                    "(health OR fitness OR exercise OR workout OR gym OR running OR yoga OR strength training OR mobility OR stretching) AND (habit OR routine OR daily OR practice) NOT (app OR software OR tech OR startup OR platform)",
+                    // Nutrition / Food / Supplements
+                    "(nutrition OR diet OR \"healthy eating\" OR \"meal prep\" OR recipe OR protein OR supplement OR vitamin OR plant-based OR mediterranean OR keto) AND (habit OR routine OR daily OR practice) NOT (app OR software OR tech OR startup OR platform)",
+                    // Wellness & Mental Health - exclude tech terms
+                    "(wellness OR meditation OR mindfulness OR sleep OR stress OR mental health OR self-care OR relaxation OR breathwork) AND (habit OR routine OR daily OR practice) NOT (app OR software OR tech OR startup OR platform)",
+                    // Productivity & Learning - exclude tech terms, focus on personal productivity
+                    "(productivity OR time management OR learning OR study OR focus OR pomodoro OR organization OR reading OR \"deep work\") AND (habit OR routine OR daily OR practice) NOT (app OR software OR tech OR startup OR platform OR programming OR code)"
+                )
+                
+                queries.forEachIndexed { index, query ->
+                    requests.add(async {
                         try {
-                            android.util.Log.d("ApiRepository", "News API query ${index + 1}/3: $query")
-                            
+                            android.util.Log.d("ApiRepository", "News API everything query ${index + 1}/${queries.size}: $query")
                             val response = newsApi.getEverything(
                                 q = query,
                                 apiKey = ApiModule.NEWS_API_KEY,
-                                pageSize = 25, // 25 per query = 75 total
+                                pageSize = 20,
                                 sortBy = "relevancy"
                             )
-                            
-                            android.util.Log.d("ApiRepository", "News API query ${index + 1} response: status=${response.status}, totalResults=${response.totalResults}")
-                            
-                            if (response.status == "ok") {
-                                response.articles
-                            } else {
-                                android.util.Log.w("ApiRepository", "News API query ${index + 1} returned non-ok status: ${response.status}")
-                                emptyList()
-                            }
+                            android.util.Log.d("ApiRepository", "Everything query ${index + 1} response: status=${response.status}, articles=${response.articles.size}")
+                            if (response.status == "ok") response.articles else emptyList()
                         } catch (e: retrofit2.HttpException) {
-                            val errorBody = e.response()?.errorBody()?.string()
-                            android.util.Log.e("ApiRepository", "News API query ${index + 1} HTTP error: ${e.code()} - ${e.message()}")
-                            android.util.Log.e("ApiRepository", "News API query ${index + 1} error body: $errorBody")
+                            android.util.Log.e("ApiRepository", "Everything query ${index + 1} HTTP error: ${e.code()}")
                             emptyList()
                         } catch (e: Exception) {
-                            android.util.Log.e("ApiRepository", "News API query ${index + 1} failed: ${e.javaClass.simpleName} - ${e.message}", e)
+                            android.util.Log.e("ApiRepository", "Everything query ${index + 1} failed: ${e.message}", e)
                             emptyList()
                         }
+                    })
                     }
-                }.awaitAll()
+                
+                requests.awaitAll()
             }.flatten()
             
-            android.util.Log.d("ApiRepository", "News API: Fetched ${allArticles.size} articles total (from ${queries.size} queries, ~25 each)")
+            android.util.Log.d("ApiRepository", "News API: Fetched ${allArticles.size} articles total")
             
-            // Log sample articles from each query
+            // Log sample articles
             allArticles.take(10).forEachIndexed { index, article ->
                 android.util.Log.d("ApiRepository", "News API article ${index + 1}: '${article.title?.take(60)}'")
             }
             
-            // Filter for relevant articles (double-check with our keyword filter)
+            // Filter for relevant articles (isRelevantNewsArticle already excludes tech content)
             val relevantArticles = allArticles.filter { article ->
                 isRelevantNewsArticle(article)
             }
             
-            android.util.Log.d("ApiRepository", "News API: Found ${relevantArticles.size} relevant articles out of ${allArticles.size} total fetched")
+            android.util.Log.d("ApiRepository", "News API: Found ${relevantArticles.size} relevant articles (after filtering) out of ${allArticles.size} total fetched")
             
             // Convert to ApiSuggestion entities
             val suggestions = relevantArticles.map { article ->
@@ -268,9 +309,7 @@ class ApiRepository(private val database: AppDatabase) {
      */
     private fun isRelevant(item: HackerNewsItem): Boolean {
         val content = item.getContentForClassification().lowercase()
-        return relevantKeywords.any { keyword ->
-            content.contains(keyword.lowercase())
-        }
+        return isRelevantContent(content)
     }
     
     /**
@@ -278,8 +317,26 @@ class ApiRepository(private val database: AppDatabase) {
      */
     private fun isRelevantNewsArticle(article: NewsArticle): Boolean {
         val content = ((article.title ?: "") + " " + (article.description ?: "") + " " + (article.content ?: "")).lowercase()
-        return relevantKeywords.any { keyword ->
-            content.contains(keyword.lowercase())
+        return isRelevantContent(content)
+    }
+    
+    private fun isRelevantContent(content: String): Boolean {
+        if (containsExclusionKeywords(content)) return false
+        val lower = content.lowercase()
+        val healthMatch = healthKeywords.any { lower.contains(it) }
+        val productivityMatch = productivityKeywords.any { lower.contains(it) }
+        val learningMatch = learningKeywords.any { lower.contains(it) }
+        return healthMatch || productivityMatch || learningMatch
+    }
+    
+    /**
+     * Checks if content contains exclusion keywords (tech-related terms).
+     * Returns true if tech content is detected.
+     */
+    private fun containsExclusionKeywords(content: String): Boolean {
+        val contentLower = content.lowercase()
+        return exclusionKeywords.any { keyword ->
+            contentLower.contains(keyword.lowercase())
         }
     }
     

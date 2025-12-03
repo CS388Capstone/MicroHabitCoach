@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.ActivityTransition
+import com.google.android.gms.location.ActivityTransitionEvent
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 import kotlinx.coroutines.CoroutineScope
@@ -102,7 +103,7 @@ class ActivityTransitionReceiver : BroadcastReceiver() {
         }
     }
     
-    private fun handleActivityTransition(context: Context, event: ActivityTransition) {
+    private fun handleActivityTransition(context: Context, event: ActivityTransitionEvent) {
         val activityType = event.activityType
         val transitionType = event.transitionType
         

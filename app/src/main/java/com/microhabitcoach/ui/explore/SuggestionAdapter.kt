@@ -36,8 +36,8 @@ class SuggestionAdapter(
 
         fun bind(suggestion: ApiSuggestion) {
             with(binding) {
-                tvSuggestionTitle.text = suggestion.title
-                tvSuggestionSource.text = suggestion.source.replace("_", " ").replaceFirstChar { it.uppercase() }
+                tvSuggestionTitle.text = suggestion.title ?: "No Title"
+                tvSuggestionSource.text = suggestion.source?.replace("_", " ")?.replaceFirstChar { it.uppercase() } ?: "Unknown Source"
                 tvSuggestionContent.text = suggestion.content ?: ""
                 
                 // Display FitScore with color coding
@@ -53,8 +53,8 @@ class SuggestionAdapter(
                 }
                 tvFitScore.setTextColor(color)
                 
-                // Set category chip
-                chipCategory.text = suggestion.category.name.lowercase().replaceFirstChar { it.uppercase() }
+                // Set category chip (handle null as "General")
+                chipCategory.text = suggestion.category?.displayName() ?: "General"
                 
                 // Set click listener for card (view details)
                 root.setOnClickListener {
@@ -80,3 +80,18 @@ class SuggestionAdapter(
     }
 }
 
+fun HabitCategory?.displayName(): String =
+    when (this) {
+        null -> "General"
+        HabitCategory.HEALTHY_EATING -> "Healthy Eating"
+        HabitCategory.FITNESS,
+        HabitCategory.WELLNESS,
+        HabitCategory.PRODUCTIVITY,
+        HabitCategory.LEARNING,
+        HabitCategory.GENERAL -> name.lowercase()
+            .replace("_", " ")
+            .split(" ")
+            .joinToString(" ") { word ->
+                word.replaceFirstChar { it.uppercase() }
+            }
+    }

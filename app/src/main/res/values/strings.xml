@@ -116,6 +116,30 @@
     <!-- Explore/Suggestions -->
     <string name="fit_score">Fit Score:</string>
     <string name="turn_into_habit">Turn into Habit</string>
+    <string name="filter_all">All</string>
+    <string name="filter_fitness">Fitness</string>
+    <string name="filter_healthy_eating">Healthy Eating</string>
+    <string name="filter_wellness">Wellness</string>
+    <string name="filter_productivity">Productivity</string>
+    <string name="filter_learning">Learning</string>
+    <string name="fit_score_info_cta">How is FitScore calculated?</string>
+    <string name="fit_score_info_title">How FitScore works</string>
+    <string name="fit_score_info_message">FitScore ranks suggestions from 0 to 100 based on your preferences, time of day, weather, and motion state. Higher scores mean the suggestion is a better match for right now, and tech-heavy articles are pushed lower so health and habit content appears first.</string>
+    <string name="weather_card_title">Context-aware weather</string>
+    <string name="weather_unavailable_title">Weather unavailable</string>
+    <string name="weather_unavailable_message">We could not load the forecast. Try again soon.</string>
+    <string name="weather_permission_message">Enable location permissions to unlock weather-aware FitScores.</string>
+    <string name="weather_positive_message">Clear skies are boosting outdoor workouts (+10 FitScore).</string>
+    <string name="weather_negative_message">Rain or wind lowers outdoor scores and boosts indoor habits.</string>
+    <string name="weather_neutral_message">Mild weather keeps FitScores balanced.</string>
+    <string name="weather_temp_format">%1$d°C / %2$d°F</string>
+    <string name="weather_condition_sunny">Sunny</string>
+    <string name="weather_condition_cloudy">Cloudy</string>
+    <string name="weather_condition_rainy">Rainy</string>
+    <string name="weather_condition_snowy">Snowy</string>
+    <string name="weather_condition_windy">Windy</string>
+    <string name="weather_condition_unknown">Weather update</string>
+    <string name="load_more">Load more</string>
 
     <!-- Notifications -->
     <string name="notification_channel_streak">Streak Reminders</string>

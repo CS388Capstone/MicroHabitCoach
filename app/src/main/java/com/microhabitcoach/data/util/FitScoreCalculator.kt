@@ -19,6 +19,7 @@ object FitScoreCalculator {
     private const val WEATHER_APPROPRIATE_BONUS = 10
     private const val LOCATION_APPROPRIATE_BONUS = 5
     private const val MOTION_STATE_MATCH_BONUS = 10
+    private const val TECH_PENALTY = -15 // Penalty for tech-related content
     
     /**
      * Calculates FitScore for a suggestion based on user context.
@@ -27,21 +28,48 @@ object FitScoreCalculator {
      * @param context The current user context
      * @return FitScore from 0-100
      */
+    // Tech exclusion keywords (same as ApiRepository and HabitClassifier)
+    private val techExclusionKeywords = listOf(
+        "app", "application", "software", "platform", "saas", "api", "sdk",
+        "code", "programming", "developer", "tech", "technology", "startup",
+        "vc", "venture capital", "funding", "ai model", "llm", "gpt", "chatbot"
+    )
+    
     fun calculate(suggestion: ApiSuggestion, context: UserContext): Int {
         var score = BASE_SCORE
+        val category = suggestion.category ?: HabitCategory.GENERAL
+        
+        // Penalize tech content (-15) - Check title and content for tech keywords
+        val titleAndContent = (suggestion.title + " " + (suggestion.content ?: "")).lowercase()
+        val hasTechKeywords = techExclusionKeywords.any { titleAndContent.contains(it) }
+        if (hasTechKeywords) {
+            // Only penalize if it's clearly tech-focused, not just mentioning tech in health context
+            val hasHealthContext = titleAndContent.contains("health") || 
+                    titleAndContent.contains("fitness") || 
+                    titleAndContent.contains("wellness") ||
+                    titleAndContent.contains("nutrition") ||
+                    titleAndContent.contains("meditation")
+            
+            if (!hasHealthContext) {
+                score += TECH_PENALTY
+                android.util.Log.d("FitScoreCalculator", "Applied tech penalty to: '${suggestion.title}'")
+            }
+        }
         
         // Category match (+20) - Most important factor
-        if (suggestion.category in context.preferredCategories) {
+        if (category in context.preferredCategories) {
             score += CATEGORY_MATCH_BONUS
         }
         
         // Boost score for specific categories that are more actionable
-        when (suggestion.category) {
-            HabitCategory.FITNESS -> score += 5 // Fitness habits are highly actionable
-            HabitCategory.WELLNESS -> score += 5 // Wellness habits are highly actionable
-            HabitCategory.PRODUCTIVITY -> score += 3 // Productivity habits are actionable
-            HabitCategory.LEARNING -> score += 2 // Learning habits are actionable
-            HabitCategory.GENERAL -> score -= 5 // General is less specific, reduce score
+        // Health/wellness categories get higher bonuses
+        when (category) {
+            HabitCategory.FITNESS -> score += 12 // Strongly prioritize fitness content
+            HabitCategory.WELLNESS -> score += 11 // Wellness is highly actionable
+            HabitCategory.HEALTHY_EATING -> score += 11 // Nutrition and food habits should stay near the top
+            HabitCategory.PRODUCTIVITY -> score += 6 // Still highlight high-impact productivity reads
+            HabitCategory.LEARNING -> score += 3 // Light boost for learning-related content
+            HabitCategory.GENERAL -> score -= 10 // Push generic content further down
         }
         
         // Time appropriateness (+15)
@@ -50,9 +78,18 @@ object FitScoreCalculator {
         }
         
         // Weather appropriateness (+10) - optional
-        if (context.currentWeather != null && 
-            isWeatherAppropriate(suggestion, context.currentWeather)) {
-            score += WEATHER_APPROPRIATE_BONUS
+        context.currentWeather?.let { weather ->
+            if (isWeatherAppropriate(category, weather)) {
+                score += WEATHER_APPROPRIATE_BONUS
+            } else {
+                if (category == HabitCategory.FITNESS) {
+                    // Outdoor workouts are less appealing in bad weather
+                    score -= 5
+                } else if (isBadOutdoorWeather(weather)) {
+                    // Rainy/snowy weather makes indoor habits (reading, meditation, cooking) more appealing
+                    score += 5
+                }
+            }
         }
         
         // Location appropriateness (+5)
@@ -62,15 +99,26 @@ object FitScoreCalculator {
         }
         
         // Motion state match (+10)
-        if (isMotionStateAppropriate(suggestion, context.recentMotionState)) {
+        if (isMotionStateAppropriate(category, context.recentMotionState)) {
             score += MOTION_STATE_MATCH_BONUS
         }
         
         // Boost score if title contains actionable words (makes it a better habit)
-        val titleLower = suggestion.title.lowercase()
-        val actionableWords = listOf("daily", "every day", "routine", "practice", "habit", "exercise", "workout", "meditation", "read", "learn")
+        val titleLower = (suggestion.title ?: "").lowercase()
+        val actionableWords = listOf(
+            "daily", "every day", "routine", "practice", "habit", "exercise", "workout", 
+            "meditation", "read", "learn", "cook", "meal prep", "healthy eating", "nutrition"
+        )
         if (actionableWords.any { titleLower.contains(it) }) {
             score += 5
+        }
+        
+        val nutritionBoostWords = listOf(
+            "supplement", "supplements", "vitamin", "vitamins", "protein", "recipe",
+            "meal prep", "diet", "keto", "plant-based", "mediterranean", "hydration"
+        )
+        if (nutritionBoostWords.any { titleAndContent.contains(it) }) {
+            score += 4
         }
         
         return score.coerceIn(0, 100)
@@ -82,8 +130,8 @@ object FitScoreCalculator {
      */
     private fun isTimeAppropriate(suggestion: ApiSuggestion, currentTime: LocalTime): Boolean {
         val hour = currentTime.hour
-        
-        return when (suggestion.category) {
+        val category = suggestion.category ?: HabitCategory.GENERAL
+        return when (category) {
             HabitCategory.FITNESS -> {
                 // Fitness: better in morning (6-10) or evening (17-20)
                 hour in 6..10 || hour in 17..20
@@ -91,6 +139,10 @@ object FitScoreCalculator {
             HabitCategory.WELLNESS -> {
                 // Wellness: better in morning (6-9) or evening (18-22)
                 hour in 6..9 || hour in 18..22
+            }
+            HabitCategory.HEALTHY_EATING -> {
+                // Healthy eating: better around meal times (7-9 breakfast, 12-14 lunch, 18-20 dinner)
+                hour in 7..9 || hour in 12..14 || hour in 18..20
             }
             HabitCategory.PRODUCTIVITY -> {
                 // Productivity: better during work hours (9-17)
@@ -109,18 +161,18 @@ object FitScoreCalculator {
      * Outdoor activities need good weather, indoor activities are always fine.
      */
     private fun isWeatherAppropriate(
-        suggestion: ApiSuggestion,
+        category: HabitCategory,
         weather: com.microhabitcoach.data.model.Weather
     ): Boolean {
-        // For MVP, we'll consider fitness/outdoor activities need good weather
-        if (suggestion.category == HabitCategory.FITNESS) {
-            return weather.condition in listOf(
+        return when (category) {
+            HabitCategory.FITNESS -> {
+                weather.condition in listOf(
                 com.microhabitcoach.data.model.WeatherCondition.SUNNY,
                 com.microhabitcoach.data.model.WeatherCondition.CLOUDY
             )
         }
-        // Other categories are generally weather-independent
-        return true
+            else -> true // Other categories are generally weather-independent
+        }
     }
     
     /**
@@ -143,10 +195,10 @@ object FitScoreCalculator {
      * Fitness activities match walking/running, stationary activities match stationary state.
      */
     private fun isMotionStateAppropriate(
-        suggestion: ApiSuggestion,
+        category: HabitCategory,
         motionState: MotionState
     ): Boolean {
-        return when (suggestion.category) {
+        return when (category) {
             HabitCategory.FITNESS -> {
                 // Fitness activities match when user is walking or running
                 motionState in listOf(MotionState.WALKING, MotionState.RUNNING)
@@ -155,12 +207,24 @@ object FitScoreCalculator {
                 // Wellness activities (meditation, etc.) match when stationary
                 motionState == MotionState.STATIONARY
             }
+            HabitCategory.HEALTHY_EATING -> {
+                // Healthy eating activities match when stationary (cooking, meal prep, eating)
+                motionState == MotionState.STATIONARY
+            }
             HabitCategory.PRODUCTIVITY, HabitCategory.LEARNING -> {
                 // Productivity/learning match when stationary
                 motionState == MotionState.STATIONARY
             }
             HabitCategory.GENERAL -> true // Always appropriate
         }
+    }
+
+    private fun isBadOutdoorWeather(weather: com.microhabitcoach.data.model.Weather): Boolean {
+        return weather.condition in listOf(
+            com.microhabitcoach.data.model.WeatherCondition.RAINY,
+            com.microhabitcoach.data.model.WeatherCondition.SNOWY,
+            com.microhabitcoach.data.model.WeatherCondition.WINDY
+        )
     }
 }
 

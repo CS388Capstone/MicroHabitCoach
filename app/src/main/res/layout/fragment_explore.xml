@@ -38,5 +38,14 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSavedArticles"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/saved_articles"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

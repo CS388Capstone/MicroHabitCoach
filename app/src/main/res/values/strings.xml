@@ -136,5 +136,18 @@
     
     <string name="mark_done">Mark Done</string>
     <string name="snooze">Snooze</string>
+    
+    <!-- Article Detail -->
+    <string name="article_image">Article image</string>
+    <string name="open_in_browser">Open in Browser</string>
+    <string name="save_article">Save Article</string>
+    <string name="unsave_article">Unsave Article</string>
+    <string name="article_saved">Article saved</string>
+    <string name="article_unsaved">Article removed from saved</string>
+    
+    <!-- Saved Articles -->
+    <string name="saved_articles">Saved Articles</string>
+    <string name="no_saved_articles">No saved articles yet. Save articles from the Explore screen to view them here.</string>
+    <string name="view_article">View Article</string>
 </resources>
 

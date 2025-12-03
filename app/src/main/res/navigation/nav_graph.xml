@@ -49,6 +49,12 @@
         <action
             android:id="@+id/actionExploreFragmentToAddEditHabitFragment"
             app:destination="@id/addEditHabitFragment" />
+        <action
+            android:id="@+id/actionExploreFragmentToArticleDetailFragment"
+            app:destination="@id/articleDetailFragment" />
+        <action
+            android:id="@+id/actionExploreFragmentToSavedArticlesFragment"
+            app:destination="@id/savedArticlesFragment" />
     </fragment>
 
     <fragment
@@ -81,6 +87,29 @@
         <action
             android:id="@+id/actionHabitDetailFragmentToAddEditHabitFragment"
             app:destination="@id/addEditHabitFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/articleDetailFragment"
+        android:name="com.microhabitcoach.ui.explore.ArticleDetailFragment"
+        android:label="Article Details"
+        tools:layout="@layout/fragment_article_detail">
+        <argument
+            android:name="suggestionId"
+            app:argType="string" />
+        <action
+            android:id="@+id/actionArticleDetailFragmentToAddEditHabitFragment"
+            app:destination="@id/addEditHabitFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/savedArticlesFragment"
+        android:name="com.microhabitcoach.ui.explore.SavedArticlesFragment"
+        android:label="@string/saved_articles"
+        tools:layout="@layout/fragment_saved_articles">
+        <action
+            android:id="@+id/actionSavedArticlesFragmentToArticleDetailFragment"
+            app:destination="@id/articleDetailFragment" />
     </fragment>
 
     <fragment

@@ -40,5 +40,8 @@ interface ApiSuggestionDao {
     
     @Query("DELETE FROM api_suggestions WHERE expiresAt IS NOT NULL AND expiresAt < :currentTime")
     suspend fun deleteExpiredSuggestions(currentTime: Long = System.currentTimeMillis())
+    
+    @Query("DELETE FROM api_suggestions")
+    suspend fun deleteAllSuggestions()
 }
 

@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.microhabitcoach.data.database.entity.Habit
 import com.microhabitcoach.data.repository.DefaultHabitRepository
 import com.microhabitcoach.data.repository.HabitRepository
+import com.microhabitcoach.notification.ReminderScheduler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -85,6 +86,9 @@ class TodayViewModel(
     fun deleteHabit(id: String) {
         viewModelScope.launch {
             try {
+                // Cancel reminder notifications before deleting
+                ReminderScheduler.cancelHabitReminders(application, id)
+                
                 repository.deleteHabit(id)
             } catch (t: Throwable) {
                 _error.value = t.message ?: "Failed to delete habit"

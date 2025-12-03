@@ -33,6 +33,7 @@ class HabitNotificationManager private constructor(private val context: Context)
         private const val NOTIFICATION_ID_STREAK_PREFIX = 1000
         private const val NOTIFICATION_ID_INACTIVITY = 2000
         private const val NOTIFICATION_ID_GEOFENCE_PREFIX = 3000
+        private const val NOTIFICATION_ID_REMINDER_PREFIX = 4000
         
         @Volatile
         private var INSTANCE: HabitNotificationManager? = null
@@ -280,6 +281,57 @@ class HabitNotificationManager private constructor(private val context: Context)
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+    }
+    
+    /**
+     * Shows a time-based habit reminder notification.
+     * 
+     * @param habit The habit to remind about
+     * @return true if notification was shown, false if duplicate
+     */
+    fun showReminderNotification(habit: Habit): Boolean {
+        val notificationId = NOTIFICATION_ID_REMINDER_PREFIX + habit.id.hashCode()
+        val notificationKey = "reminder_${habit.id}_${System.currentTimeMillis() / (60 * 60 * 1000)}" // Unique per hour
+        
+        // Prevent duplicate notifications
+        if (sentNotifications.contains(notificationKey)) {
+            return false
+        }
+        
+        val title = context.getString(R.string.notification_reminder_title, habit.name)
+        val message = context.getString(R.string.notification_reminder_message, habit.name)
+        
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("habitId", habit.id)
+        }
+        
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        val markDoneIntent = createMarkDoneIntent(habit.id, notificationId)
+        val snoozeIntent = createSnoozeIntent(habit.id, notificationId, NotificationType.REMINDER)
+        
+        val notification = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_menu_compass, context.getString(R.string.mark_done), markDoneIntent)
+            .addAction(android.R.drawable.ic_menu_revert, context.getString(R.string.snooze), snoozeIntent)
+            .setAutoCancel(true)
+            .build()
+        
+        notificationManager.notify(notificationId, notification)
+        sentNotifications.add(notificationKey)
+        
+        return true
     }
     
     /**

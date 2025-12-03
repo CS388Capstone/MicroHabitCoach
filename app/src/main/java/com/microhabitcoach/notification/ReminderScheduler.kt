@@ -45,12 +45,15 @@ object ReminderScheduler {
     
     /**
      * Cancels all reminders for a habit.
-     * Since we can't query WorkManager by prefix, we cancel by attempting to cancel
-     * all possible reminder times. In practice, this is acceptable because:
-     * 1. We use REPLACE policy, so rescheduling will replace existing work
-     * 2. The number of reminder times per habit is typically small (1-5)
      * 
-     * A more robust solution would track work names, but for MVP this is sufficient.
+     * Note: WorkManager doesn't support canceling work by prefix pattern.
+     * We cancel the snoozed reminder explicitly. For scheduled reminders, we rely on:
+     * 1. The worker checking if the habit still exists (it will return early if deleted)
+     * 2. REPLACE policy when rescheduling (replaces existing work)
+     * 
+     * For a more robust solution, we could track work names in SharedPreferences,
+     * but for MVP this is acceptable since deleted habits won't trigger notifications
+     * (the worker checks if habit exists before showing notification).
      */
     fun cancelHabitReminders(context: Context, habitId: String) {
         val workManager = WorkManager.getInstance(context)
@@ -58,14 +61,14 @@ object ReminderScheduler {
         // Cancel snoozed reminder
         workManager.cancelUniqueWork("habit_reminder_snooze_$habitId")
         
-        // Note: We can't easily cancel all reminders without tracking them.
-        // Since we use REPLACE policy when scheduling, rescheduling will replace existing work.
-        // For a more robust solution, we could:
-        // 1. Store work names in SharedPreferences or database
-        // 2. Use WorkManager tags (but tags don't support unique work cancellation)
-        // 3. Cancel all work and reschedule all active habits (expensive)
+        // Note: We can't easily cancel scheduled reminders without tracking work names.
+        // However, this is safe because:
+        // 1. HabitReminderWorker checks if habit exists before showing notification
+        // 2. If habit is deleted, the worker will return early and not show notification
+        // 3. The work will eventually complete and not reschedule (since habit is gone)
         
-        // For MVP, we rely on REPLACE policy to handle cancellation when rescheduling
+        // For a production app, consider storing work names in SharedPreferences or database
+        // to enable proper cancellation of all scheduled reminders
     }
     
     /**

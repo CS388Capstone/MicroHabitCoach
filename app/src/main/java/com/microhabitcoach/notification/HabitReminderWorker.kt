@@ -24,8 +24,14 @@ class HabitReminderWorker(
                 val originalReminderTimeHour = inputData.getInt(KEY_REMINDER_TIME_HOUR, -1)
                 val originalReminderTimeMinute = inputData.getInt(KEY_REMINDER_TIME_MINUTE, -1)
                 
-                // Check if this is a snooze (no reminder time provided)
-                val isSnooze = originalReminderTimeHour == -1 || originalReminderTimeMinute == -1
+                // Check if this is a snooze (both reminder time fields missing)
+                // Snooze requests only provide habit ID, not reminder time
+                val isSnooze = originalReminderTimeHour == -1 && originalReminderTimeMinute == -1
+                
+                // If only one field is missing, that's an error (shouldn't happen in normal flow)
+                if ((originalReminderTimeHour == -1) != (originalReminderTimeMinute == -1)) {
+                    return@withContext Result.failure()
+                }
                 
                 val repository = DefaultHabitRepository(applicationContext)
                 val database = DatabaseModule.getDatabase(applicationContext)

@@ -78,7 +78,9 @@ class TodayFragment : Fragment() {
 
     private fun setupPullToRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
-            viewModel.loadHabits()
+            // Manually refresh completion status without restarting the Flow
+            viewModel.refreshHabitsCompletionStatus()
+            binding.swipeRefreshLayout.isRefreshing = false
         }
     }
 

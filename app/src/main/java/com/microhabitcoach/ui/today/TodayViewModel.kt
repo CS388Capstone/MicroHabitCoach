@@ -35,7 +35,9 @@ class TodayViewModel(
     private var habitsJob: Job? = null
 
     fun loadHabits() {
-        if (habitsJob != null) return
+        // Cancel existing job if running
+        habitsJob?.cancel()
+        
         _isLoading.value = true
         habitsJob = viewModelScope.launch {
             repository.observeHabits()
@@ -54,7 +56,10 @@ class TodayViewModel(
                     // Sort: incomplete first, completed below
                     val sorted = habitsWithCompletion.sortedBy { it.isCompletedToday }
                     _habits.value = sorted
-                    _isLoading.value = false
+                    // Only set loading to false on first load, not on every update
+                    if (_isLoading.value == true) {
+                        _isLoading.value = false
+                    }
                 }
         }
     }
@@ -71,15 +76,17 @@ class TodayViewModel(
         }
     }
 
-    private suspend fun refreshHabitsCompletionStatus() {
-        val currentHabits = _habits.value
-        if (currentHabits != null) {
-            val updated = currentHabits.map { habitWithCompletion ->
-                val isCompleted = repository.isHabitCompletedToday(habitWithCompletion.habit.id)
-                HabitWithCompletion(habitWithCompletion.habit, isCompleted)
+    fun refreshHabitsCompletionStatus() {
+        viewModelScope.launch {
+            val currentHabits = _habits.value
+            if (currentHabits != null) {
+                val updated = currentHabits.map { habitWithCompletion ->
+                    val isCompleted = repository.isHabitCompletedToday(habitWithCompletion.habit.id)
+                    HabitWithCompletion(habitWithCompletion.habit, isCompleted)
+                }
+                val sorted = updated.sortedBy { it.isCompletedToday }
+                _habits.value = sorted
             }
-            val sorted = updated.sortedBy { it.isCompletedToday }
-            _habits.value = sorted
         }
     }
 

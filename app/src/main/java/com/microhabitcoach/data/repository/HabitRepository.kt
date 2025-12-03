@@ -16,6 +16,8 @@ interface HabitRepository {
     suspend fun completeHabit(habitId: String)
     suspend fun deleteHabit(id: String)
     suspend fun isHabitCompletedToday(habitId: String): Boolean
+    suspend fun clearAllCompletions()
+    suspend fun resetAllStreaks()
 }
 
 class DefaultHabitRepository(
@@ -73,6 +75,18 @@ class DefaultHabitRepository(
         val todayEnd = todayStart + 24 * 60 * 60 * 1000
         val completion = completionDao.getCompletionForDay(habitId, todayStart, todayEnd)
         return completion != null
+    }
+
+    override suspend fun clearAllCompletions() {
+        completionDao.deleteAllCompletions()
+    }
+
+    override suspend fun resetAllStreaks() {
+        val now = System.currentTimeMillis()
+        val allHabits = habitDao.getAllHabitsSync()
+        allHabits.forEach { habit ->
+            habitDao.updateStreakCount(habit.id, 0, now)
+        }
     }
 
     private fun getTodayStartTimestamp(): Long {

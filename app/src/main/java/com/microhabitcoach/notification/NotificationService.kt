@@ -1,6 +1,8 @@
 package com.microhabitcoach.notification
 
 import android.content.Context
+import com.microhabitcoach.activity.ActivityRecognitionService
+import com.microhabitcoach.activity.ActivityRecognitionWorker
 
 /**
  * Service to initialize and manage all notification-related workers.
@@ -18,6 +20,10 @@ object NotificationService {
         // Schedule periodic workers
         StreakCountdownWorker.schedulePeriodicCheck(context)
         InactivityDetectionWorker.schedulePeriodicCheck(context)
+        ActivityRecognitionWorker.schedulePeriodicCheck(context)
+        
+        // Start activity recognition monitoring
+        ActivityRecognitionService.startMonitoring(context)
     }
     
     /**

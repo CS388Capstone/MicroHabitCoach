@@ -13,6 +13,7 @@ import com.microhabitcoach.data.database.entity.ApiSuggestion
 import com.microhabitcoach.data.database.entity.UserPreferences
 import com.microhabitcoach.data.model.HabitCategory
 import com.microhabitcoach.data.model.MotionState
+import com.microhabitcoach.activity.ActivityDurationTracker
 import com.microhabitcoach.data.model.UserContext
 import com.microhabitcoach.data.repository.ApiRepository
 import com.microhabitcoach.data.util.FitScoreCalculator
@@ -345,9 +346,9 @@ class ExploreViewModel(
         // For now, we'll use null (location is optional)
         val currentLocation: Location? = null
         
-        // TODO: Get recent motion state from ActivityRecognition
-        // For now, we'll use UNKNOWN (motion state is optional)
-        val motionState = MotionState.UNKNOWN
+        // Get recent motion state from ActivityDurationTracker
+        ActivityDurationTracker.initialize(context)
+        val motionState = ActivityDurationTracker.getCurrentMotionState()
         
         // TODO: Get current weather (optional for MVP)
         val currentWeather = null

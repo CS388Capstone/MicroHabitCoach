@@ -311,10 +311,10 @@ class ExploreViewModel(
      * @return UserContext for FitScore calculation
      */
     private suspend fun buildUserContext(): UserContext {
-        // Get user preferences
+        // Get user preferences using PreferencesRepository to ensure defaults exist
+        val preferencesRepository = com.microhabitcoach.data.repository.PreferencesRepository(getApplication())
         val preferences = withContext(Dispatchers.IO) {
-            userPreferencesDao.getUserPreferences() 
-                ?: UserPreferences() // Default preferences if none exist
+            preferencesRepository.getPreferencesOrCreateDefault()
         }
         
         // Get current time

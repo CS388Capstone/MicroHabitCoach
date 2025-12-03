@@ -182,15 +182,8 @@ class OnboardingFragment : Fragment() {
         // Mark onboarding as complete
         lifecycleScope.launch {
             try {
-                val database = DatabaseModule.getDatabase(requireContext())
-                val dao = database.userPreferencesDao()
-                val preferences = dao.getUserPreferences() ?: com.microhabitcoach.data.database.entity.UserPreferences()
-                
-                val updated = preferences.copy(
-                    hasCompletedOnboarding = true,
-                    updatedAt = System.currentTimeMillis()
-                )
-                dao.insertUserPreferences(updated)
+                val preferencesRepository = com.microhabitcoach.data.repository.PreferencesRepository(requireContext())
+                preferencesRepository.setOnboardingCompleted(true)
                 
                 // Navigate to Today screen
                 findNavController().navigate(

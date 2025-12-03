@@ -26,6 +26,9 @@ interface UserPreferencesDao {
     @Query("UPDATE user_preferences SET preferredCategories = :categories, updatedAt = :updatedAt WHERE userId = :userId")
     suspend fun updatePreferredCategories(userId: String, categories: String, updatedAt: Long)
     
+    @Query("SELECT COUNT(*) FROM user_preferences WHERE userId = :userId")
+    suspend fun hasPreferences(userId: String = "default_user"): Int
+    
     @Query("UPDATE user_preferences SET notificationsEnabled = :enabled, updatedAt = :updatedAt WHERE userId = :userId")
     suspend fun updateNotificationsEnabled(userId: String, enabled: Boolean, updatedAt: Long)
     

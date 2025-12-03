@@ -237,12 +237,42 @@ class AddEditHabitFragment : Fragment() {
             viewModel.loadHabit(habitId)
         } else {
             binding.btnDelete.isVisible = false
+            // Pre-fill from suggestion if available
             args.suggestionName?.takeIf { it.isNotBlank() }?.let {
                 binding.etHabitName.setText(it)
             }
             args.suggestionCategory?.let { setCategorySelection(it) }
-            args.suggestionType?.let { setTypeSelection(it) }
+            args.suggestionType?.let { 
+                setTypeSelection(it)
+                // Pre-fill default parameters based on type
+                prefillDefaultParameters(it)
+            }
             updatePreview()
+        }
+    }
+
+    private fun prefillDefaultParameters(typeString: String) {
+        val type = when (typeString.lowercase()) {
+            "time", "time-based", "time_based" -> HabitType.TIME
+            "motion", "motion-based", "motion_based" -> HabitType.MOTION
+            "location", "location-based", "location_based" -> HabitType.LOCATION
+            else -> HabitType.TIME
+        }
+        
+        when (type) {
+            HabitType.MOTION -> {
+                // Pre-fill motion type and duration for motion-based habits
+                binding.actvMotionType.setText("Walk", false)
+                binding.etDuration.setText("30")
+            }
+            HabitType.LOCATION -> {
+                // Pre-fill radius for location-based habits
+                binding.etRadius.setText("100")
+            }
+            HabitType.TIME -> {
+                // Time-based habits don't need default pre-fills
+                // User can add reminder times and days
+            }
         }
     }
 

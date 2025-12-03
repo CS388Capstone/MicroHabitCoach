@@ -112,5 +112,9 @@
     <string name="stats">Stats</string>
     <string name="settings">Settings</string>
     <string name="habit_detail">Habit Detail</string>
+
+    <!-- Explore/Suggestions -->
+    <string name="fit_score">Fit Score:</string>
+    <string name="turn_into_habit">Turn into Habit</string>
 </resources>
 

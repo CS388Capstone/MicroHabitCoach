@@ -1,18 +1,24 @@
 package com.microhabitcoach.ui.habit
 
 import android.app.TimePickerDialog
+import android.location.Geocoder
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -24,8 +30,11 @@ import com.microhabitcoach.data.model.LocationData
 import com.microhabitcoach.databinding.FragmentAddEditHabitBinding
 import com.microhabitcoach.ui.habit.AddEditHabitViewModel.FormState
 import com.microhabitcoach.ui.habit.AddEditHabitViewModel.SaveState
+import com.microhabitcoach.util.PermissionHelper
+import java.io.IOException
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class AddEditHabitFragment : Fragment() {
 
@@ -41,6 +50,21 @@ class AddEditHabitFragment : Fragment() {
     private val selectedDays = mutableSetOf<Int>()
     private var selectedLocation: LocationData? = null
     private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
+    
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            getCurrentLocation()
+        } else {
+            Snackbar.make(
+                binding.root,
+                R.string.location_permission_denied,
+                Snackbar.LENGTH_LONG
+            ).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +77,7 @@ class AddEditHabitFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         setupCategorySpinner()
         setupMotionTypeDropdown()
         setupTypeSelector()
@@ -158,15 +183,81 @@ class AddEditHabitFragment : Fragment() {
 
     private fun setupLocationPicker() = with(binding) {
         btnPickLocation.setOnClickListener {
-            // Placeholder until map picker is wired up
-            selectedLocation = LocationData(
-                latitude = 37.7749,
-                longitude = -122.4194,
-                address = "San Francisco, CA"
-            )
-            tvLocationAddress.text = selectedLocation?.address ?: getString(R.string.no_location_selected)
-            Snackbar.make(root, R.string.location_mock_message, Snackbar.LENGTH_SHORT).show()
-            updatePreview()
+            if (PermissionHelper.hasLocationPermission(requireContext())) {
+                getCurrentLocation()
+            } else {
+                locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+    
+    private fun getCurrentLocation() {
+        if (!PermissionHelper.hasLocationPermission(requireContext())) {
+            return
+        }
+        
+        try {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        val locationData = LocationData(
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            address = getAddressFromLocation(location.latitude, location.longitude)
+                        )
+                        selectedLocation = locationData
+                        binding.tvLocationAddress.text = locationData.address
+                            ?: getString(R.string.location_selected)
+                        updatePreview()
+                    } else {
+                        Snackbar.make(
+                            binding.root,
+                            R.string.location_unavailable,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.location_error, e.message),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+        } catch (e: SecurityException) {
+            Snackbar.make(
+                binding.root,
+                R.string.location_permission_denied,
+                Snackbar.LENGTH_SHORT
+            ).show()
+        }
+    }
+    
+    private fun getAddressFromLocation(latitude: Double, longitude: Double): String? {
+        return try {
+            val geocoder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Geocoder(requireContext(), Locale.getDefault())
+            } else {
+                @Suppress("DEPRECATION")
+                Geocoder(requireContext(), Locale.getDefault())
+            }
+            
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (addresses != null && addresses.isNotEmpty()) {
+                val address = addresses[0]
+                // Format: Street, City, State
+                val addressParts = mutableListOf<String>()
+                address.getAddressLine(0)?.let { addressParts.add(it) }
+                address.locality?.let { addressParts.add(it) }
+                address.adminArea?.let { addressParts.add(it) }
+                addressParts.joinToString(", ")
+            } else {
+                null
+            }
+        } catch (e: IOException) {
+            null
+        } catch (e: IllegalArgumentException) {
+            null
         }
     }
 

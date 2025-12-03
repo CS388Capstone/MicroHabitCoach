@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.microhabitcoach.data.database.entity.Habit
 import com.microhabitcoach.data.repository.DefaultHabitRepository
 import com.microhabitcoach.data.repository.HabitRepository
+import com.microhabitcoach.geofence.GeofenceService
 import com.microhabitcoach.notification.ReminderScheduler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -95,6 +96,9 @@ class TodayViewModel(
             try {
                 // Cancel reminder notifications before deleting
                 ReminderScheduler.cancelHabitReminders(application, id)
+                
+                // Remove geofence before deleting
+                GeofenceService.removeGeofence(application, id)
                 
                 repository.deleteHabit(id)
             } catch (t: Throwable) {

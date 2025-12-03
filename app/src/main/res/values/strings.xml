@@ -41,6 +41,10 @@
     <string name="error_required">Required</string>
     <string name="error_positive_number">Must be greater than 0</string>
     <string name="location_mock_message">Location picker coming soon. Using demo location.</string>
+    <string name="location_permission_denied">Location permission is required to select your current location</string>
+    <string name="location_unavailable">Unable to get your current location. Please try again.</string>
+    <string name="location_error">Location error: %1$s</string>
+    <string name="location_selected">Location selected</string>
 
     <!-- Preview helpers -->
     <string name="preview_type_format">%1$s • %2$s</string>

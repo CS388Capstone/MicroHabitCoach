@@ -16,9 +16,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.microhabitcoach.R
 import com.microhabitcoach.data.database.DatabaseModule
+import com.microhabitcoach.data.database.entity.Habit
+import com.microhabitcoach.data.model.HabitCategory
+import com.microhabitcoach.data.model.HabitType
 import com.microhabitcoach.databinding.FragmentOnboardingBinding
 import com.microhabitcoach.ui.onboarding.OnboardingStep.Companion.TOTAL_STEPS
 import kotlinx.coroutines.launch
+import java.time.LocalTime
+import java.util.UUID
 
 class OnboardingFragment : Fragment() {
 
@@ -47,9 +52,31 @@ class OnboardingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Check if onboarding is already completed - if so, skip to Today screen
+        checkOnboardingStatus()
+        
         setupViewPager()
         setupControls()
         updateProgress(0)
+    }
+    
+    private fun checkOnboardingStatus() {
+        lifecycleScope.launch {
+            try {
+                val preferencesRepository = com.microhabitcoach.data.repository.PreferencesRepository(requireContext())
+                val preferences = preferencesRepository.getPreferences()
+                
+                if (preferences?.hasCompletedOnboarding == true) {
+                    // Onboarding already completed, skip to Today screen
+                    findNavController().navigate(
+                        OnboardingFragmentDirections.actionOnboardingFragmentToTodayFragment()
+                    )
+                }
+            } catch (e: Exception) {
+                // If check fails, continue with onboarding
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun setupViewPager() {
@@ -80,20 +107,10 @@ class OnboardingFragment : Fragment() {
     }
 
     private fun handleStepAction(step: OnboardingStep) {
+        // Single condensed onboarding step:
+        // tapping the action button just advances to completion.
         when (step) {
-            OnboardingStep.WELCOME,
-            OnboardingStep.TEMPLATES -> {
-                moveToNextStep()
-            }
-            OnboardingStep.PERMISSION_MOTION -> {
-                requestActivityRecognitionPermission()
-            }
-            OnboardingStep.PERMISSION_LOCATION -> {
-                requestLocationPermission()
-            }
-            OnboardingStep.PERMISSION_NOTIFICATIONS -> {
-                requestNotificationPermission()
-            }
+            OnboardingStep.WELCOME -> moveToNextStep()
         }
     }
 
@@ -185,13 +202,18 @@ class OnboardingFragment : Fragment() {
                 val preferencesRepository = com.microhabitcoach.data.repository.PreferencesRepository(requireContext())
                 preferencesRepository.setOnboardingCompleted(true)
                 
-                // Navigate to Today screen
-                findNavController().navigate(
-                    OnboardingFragmentDirections.actionOnboardingFragmentToTodayFragment()
+                // After onboarding, guide user directly into Add Habit flow
+                // with a simple default template (can be edited before saving).
+                val action = OnboardingFragmentDirections.actionOnboardingFragmentToAddEditHabitFragment(
+                    habitId = null,
+                    suggestionName = getString(R.string.onboarding_starter_habit_name),
+                    suggestionCategory = HabitCategory.FITNESS.name,
+                    suggestionType = "time"
                 )
+                findNavController().navigate(action)
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Navigate anyway if save fails
+                // On error, still try to navigate to Today as a fallback
                 findNavController().navigate(
                     OnboardingFragmentDirections.actionOnboardingFragmentToTodayFragment()
                 )

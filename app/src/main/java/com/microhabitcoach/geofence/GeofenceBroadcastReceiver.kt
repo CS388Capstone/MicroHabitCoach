@@ -56,9 +56,9 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     
     private fun getGeofenceErrorString(errorCode: Int): String {
         return when (errorCode) {
-            GeofencingEvent.ERROR_GEOFENCE_NOT_AVAILABLE -> "Geofence not available"
-            GeofencingEvent.ERROR_GEOFENCE_TOO_MANY_GEOFENCES -> "Too many geofences"
-            GeofencingEvent.ERROR_GEOFENCE_TOO_MANY_PENDING_INTENTS -> "Too many pending intents"
+            1000 -> "Geofence not available" // GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE
+            1001 -> "Too many geofences" // GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES
+            1002 -> "Too many pending intents" // GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS
             else -> "Unknown geofence error: $errorCode"
         }
     }

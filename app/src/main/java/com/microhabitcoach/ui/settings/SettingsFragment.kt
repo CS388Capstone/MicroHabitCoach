@@ -153,6 +153,10 @@ class SettingsFragment : Fragment() {
         binding.resetStreaksButton.setOnClickListener {
             showResetStreaksConfirmation()
         }
+
+        binding.resetOnboardingButton.setOnClickListener {
+            showResetOnboardingConfirmation()
+        }
     }
 
     private fun showTimePicker(isStartTime: Boolean) {
@@ -211,6 +215,17 @@ class SettingsFragment : Fragment() {
             .setMessage(R.string.reset_streaks_confirmation)
             .setPositiveButton(R.string.confirm) { _, _ ->
                 viewModel.resetAllStreaks()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showResetOnboardingConfirmation() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.reset_onboarding)
+            .setMessage(R.string.reset_onboarding_confirmation)
+            .setPositiveButton(R.string.confirm) { _, _ ->
+                viewModel.resetOnboarding()
             }
             .setNegativeButton(R.string.cancel, null)
             .show()

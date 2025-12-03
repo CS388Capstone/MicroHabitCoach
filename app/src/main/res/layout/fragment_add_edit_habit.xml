@@ -261,13 +261,47 @@
                 android:text="@string/no_location_selected"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilAddress"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/enter_address"
+                app:errorEnabled="true"
+                app:helperText="@string/address_helper_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPostalAddress|textCapSentences" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnUseAddress"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/use_address" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/or"
+                android:textAlignment="center"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPickLocation"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/pick_location" />
+                android:text="@string/pick_current_location" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilRadius"

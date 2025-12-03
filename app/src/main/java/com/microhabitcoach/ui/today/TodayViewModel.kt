@@ -98,7 +98,7 @@ class TodayViewModel(
                 ReminderScheduler.cancelHabitReminders(getApplication(), id)
                 
                 // Remove geofence before deleting
-                GeofenceService.removeGeofence(application, id)
+                GeofenceService.removeGeofence(getApplication(), id)
                 
                 repository.deleteHabit(id)
             } catch (t: Throwable) {

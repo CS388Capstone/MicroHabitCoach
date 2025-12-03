@@ -1,3 +1,222 @@
+## MicroHabit Coach – Final Milestone (Unit 9) – Complete App Summary
+
+### Overview
+
+**MicroHabit Coach** is a mobile-native habit companion that **suggests**, **tracks**, and **auto-completes** micro‑habits using:
+- **Live content streams** from the web (Hacker News + News API + OpenWeather)
+- **On-device intelligence** (classification + FitScore calculation)
+- **Android sensors & services** (activity recognition, geofencing, background workers, notifications)
+
+The app now implements **two fully functional Stream screens**:
+- **Today Stream** – your personalized habit dashboard with streaks, auto-completion, and real-time updates.
+- **Explore Stream** – a smart suggestions feed built from public APIs, scored against your current context.
+
+This top section describes the **final shipped state** of the project (Milestone 2 / Unit 9). All original Unit 7/8 planning content remains below for reference.
+
+---
+
+### Final Feature Set & User Stories
+
+- **Core Streams**
+  - **Today Screen (Stream #1)**  
+    - View all habits scheduled for today, grouped by completion status.  
+    - One‑tap completion with visual feedback and streak updates.  
+    - Auto‑completion from motion and geofence triggers.  
+    - Summary banner: **“X of Y habits completed today”**.
+  - **Explore Screen (Stream #2)**  
+    - Scrollable stream of suggestions built from **Hacker News** and **News API** content.  
+    - Each suggestion shows title, source, **FitScore (0–100)**, category, and context indicators.  
+    - **“Turn into Habit”** converts any card into a pre‑filled habit in one tap.
+
+- **Habit Lifecycle**
+  - Create **Time**, **Motion**, or **Location** based habits with a dynamic form.  
+  - Edit and delete habits; all database records, notifications, and geofences stay in sync.  
+  - Detailed **Habit Detail** screen with streaks, calendar history, and trends.
+
+- **Context-Aware Coaching**
+  - **Activity Recognition** auto‑completes motion-based habits when walking/running thresholds are met.  
+  - **Geofenced Nudges** trigger notifications when entering user-defined locations (e.g., gym, home).  
+  - **Dynamic notifications** warn when streaks are at risk or when the user has been inactive for too long.
+
+- **Analytics & Settings**
+  - **Stats screen** shows longest streaks, completion percentages, “best day of week,” and category breakdowns.  
+  - **Settings** manages notifications, Quiet Hours, permissions, and data management (clear history / reset streaks).
+
+#### Completed User Stories (End of Milestone 2)
+
+- As a new user, I can go through onboarding, grant permissions, and land on a populated Today dashboard.  
+- As a user, I can create time, movement, or location‑based habits and see them on the Today screen.  
+- As a user, I can convert a suggestion from the Explore stream into a habit with one tap and minimal typing.  
+- As a user, I get notifications when:
+  - It’s time for a scheduled habit,  
+  - I’ve been inactive for a long period, or  
+  - I enter a geofenced location tied to a habit.
+- As a user, I can see detailed history, streaks, and completion trends for each habit.  
+- As a user, I can change notification preferences, Quiet Hours, and clear my history from Settings.
+
+---
+
+### Architecture & Key Modules
+
+- **Architecture Pattern**: MVVM with **Room**, **ViewModel**, **LiveData**, and **Repository** layers.
+- **Persistence**
+  - Entities: `Habit`, `Completion`, `ApiSuggestion`, `SavedArticle`, `UserPreferences`.  
+  - DAOs: `HabitDao`, `CompletionDao`, `ApiSuggestionDao`, `SavedArticleDao`, `UserPreferencesDao`.  
+  - `AppDatabase` and `DatabaseModule` wire these together.
+- **Repositories**
+  - `HabitRepository` – source of truth for habits and completions; coordinates geofences and reminders when habits change.  
+  - `ApiRepository` – orchestrates Hacker News + News API, caching suggestions in Room.  
+  - `WeatherRepository` – wraps OpenWeather API and exposes current conditions for scoring.  
+  - `PreferencesRepository` – stores user category preferences, Quiet Hours, and other settings.
+- **UI Layers**
+  - `today/` – `TodayFragment`, `HabitItemAdapter`, `TodayViewModel`.  
+  - `explore/` – `ExploreFragment`, `SuggestionAdapter`, `ExploreViewModel`, `ArticleDetailFragment`.  
+  - `habit/` – `AddEditHabitFragment`, `AddEditHabitViewModel`, `HabitFormValidator`.  
+  - `habitdetail/` – `HabitDetailFragment`, `HabitAnalytics`, `CalendarDayAdapter`, `CompletionHistoryAdapter`.  
+  - `stats/` – `StatsFragment`, `StatsViewModel`, `ProfileStatsViewModel`, `StatsAnalytics`.  
+  - `settings/` – `SettingsFragment`, `SettingsViewModel`.  
+  - `onboarding/` – `OnboardingFragment`, `OnboardingAdapter`, `OnboardingStep`.  
+  - `MainActivity` – NavHost + app‑level initialization (activity recognition + geofence sync).
+
+---
+
+### External APIs & Data Flow
+
+- **Hacker News API** (`HackerNewsApi.kt`)
+  - Fetches top story IDs and individual items.  
+  - Filters posts by habit‑relevant keywords (e.g., workout, exercise, health, productivity).  
+  - Maps results to `ApiSuggestion` entities stored locally.
+
+- **News API** (`NewsApi.kt`)
+  - Optional backup provider for health/fitness/productivity articles.  
+  - Normalized into the same `ApiSuggestion` model so the Explore stream is backend‑agnostic.  
+  - Used conservatively to respect free‑tier rate limits.
+
+- **OpenWeather API** (`WeatherApi.kt`)
+  - Provides current weather for the user’s approximate location.  
+  - Consumed by `WeatherRepository` and injected into the **FitScore** calculation.
+
+- **Classification & FitScore**
+  - `HabitClassifier` assigns categories: Fitness, Wellness, Productivity, Learning, or General using keyword rules only (no ML).  
+  - `FitScoreCalculator` combines:
+    - User category preferences (`UserPreferences` / `UserContext`),  
+    - Time of day,  
+    - Weather conditions from OpenWeather,  
+    - Proximity to important locations,  
+    - Recent motion state (from activity recognition).  
+  - Explore cards display the resulting score and are sorted by FitScore so the most context‑appropriate ideas surface first.
+
+---
+
+### Mobile-Native Features
+
+- **Activity Recognition & Auto-Completion**
+  - Implemented with `ActivityRecognitionService`, `ActivityTransitionReceiver`, `ActivityDurationTracker`, and `ActivityRecognitionWorker`.  
+  - Detects walking/running/stationary states using the ActivityTransition API.  
+  - Motion-based habits are automatically marked complete when configured duration thresholds are met, updating the Today stream in real time.
+
+- **Geofencing**
+  - Core logic in `GeofenceService` and `GeofenceBroadcastReceiver`, with user‑visible notifications via `GeofenceNotificationHandler`.  
+  - Integrated across the habit lifecycle:
+    - `AddEditHabitViewModel` – creates/updates/removes geofences when saving or editing location habits or changing type.  
+    - `TodayViewModel` – removes geofences when deleting location habits from Today.  
+    - `MainActivity` – calls a sync routine on startup to ensure Android’s geofence registry exactly matches active location habits in Room.  
+  - Handles permission failures gracefully and respects Android’s geofence count limits.
+
+- **Notifications & Background Work**
+  - Workers: `HabitReminderWorker`, `StreakCountdownWorker`, `InactivityDetectionWorker`.  
+  - Coordination layer: `NotificationManager`, `NotificationService`, `ReminderScheduler`, `NotificationActionReceiver`.  
+  - Supports:
+    - Time‑based reminders for scheduled habits via WorkManager.  
+    - Streak‑saving countdown notifications late in the day.  
+    - Inactivity nudges after prolonged stillness.  
+    - Geofence‑triggered notifications when entering defined locations.  
+    - Action buttons (Mark Done, Snooze) that update Room directly without forcing users into the app.
+
+---
+
+### Final Status vs. Original Plan
+
+- **Streams & Screens**
+  - Both Streams (**Today** and **Explore**) are implemented and driven by real data.  
+  - All specified archetypes exist: Onboarding, Today, Explore, Habit Detail, Add/Edit, Profile/Stats, Settings.
+
+- **Required Features (Product Spec)**
+  - Implemented: Today Stream, Explore Stream, classification + FitScore, full habit CRUD, detail analytics, stats, settings, activity recognition auto‑completion.  
+  - Geofencing: infrastructure plus full lifecycle integration (create/edit/delete/startup sync) are complete and demo‑ready.  
+  - Notifications: time, streak, inactivity, and geofence notifications wired through WorkManager and notification actions.
+
+- **Optional / Stretch**
+  - Weather-aware scoring via OpenWeather is implemented.  
+  - Deep social features and full cloud sync are intentionally deferred beyond this milestone.
+
+For a detailed spec‑vs‑implementation matrix and geofencing deep dive, see `context/IMPLEMENTATION_STATUS.md` and `context/GEOFENCING_INTEGRATION.md`.
+
+---
+
+### Challenges & Design Decisions
+
+- **Geofencing Lifecycle**
+  - Challenge: keeping Android’s geofence registry exactly in sync with Room as habits change.  
+  - Decision: centralize geofence operations in `GeofenceService` and call it only from `AddEditHabitViewModel`, `TodayViewModel`, and `MainActivity`, ensuring a single source of truth.
+
+- **Battery vs. Context Awareness**
+  - Challenge: using motion and location data aggressively without draining the battery.  
+  - Decision: rely on the ActivityTransition API for coarse transitions, track durations only while “in motion,” and use low‑power geofences with a one‑time sync on startup instead of constant churn.
+
+- **API Reliability & Limits**
+  - Hacker News is free/unlimited but noisy; News API and OpenWeather are structured but rate‑limited.  
+  - Decision: use HN as the primary stream, persist suggestions locally, and treat News API and OpenWeather as context enhancers rather than hard dependencies.
+
+- **Authentication Scope**
+  - The original spec included login; for this course milestone, we focused engineering effort on the Streams, automation, and sensors.  
+  - The current build uses a lightweight onboarding-first flow; full auth can be added in a future iteration without changing the core architecture.
+
+---
+
+### Setup & Run Instructions
+
+- **Prerequisites**
+  - Android Studio (Giraffe or newer recommended).  
+  - Android SDK 26+ with Google Play Services.  
+  - Physical Android device strongly recommended to demo geofencing and motion detection reliably.
+
+- **Clone & Open**
+  - Open the `MicroHabitCoach` project in Android Studio.  
+  - Allow Gradle to sync and download all dependencies.
+
+- **API Keys**
+  - Add your keys in `local.properties` (or the configured Gradle location) for:
+    - News API (optional)  
+    - OpenWeather API  
+  - If keys are missing, the app still functions with Hacker News only; weather‑based scoring simply degrades gracefully.
+
+- **Running the App**
+  - Build and install the debug build on your device/emulator.  
+  - On first launch:
+    - Complete onboarding and grant Location, Activity Recognition, and Notification permissions.  
+    - Create at least one time, motion, and location habit.  
+    - Optionally walk around or move into a configured geofence to see auto‑completion and geofence notifications in action.
+
+---
+
+### Demo Assets & Project Board
+
+- **Demo Video & GIFs**
+  - The **“App Demo Video”** and **“Current Progress GIFs”** sections later in this README contain links showing:
+    - Today stream usage and habit completion,  
+    - Explore stream suggestions and “Turn into Habit” flow,  
+    - Stats and Settings interactions,  
+    - (Where possible) examples of motion and geofence‑driven completions.
+
+- **Project Management**
+  - Screenshots of the GitHub Project board and sprint breakdowns are included in the Milestone 2/3 sections below.  
+  - They document how user stories moved from TODO → In Progress → Done across Units 8 and 9.
+
+Everything below this line is the **original milestone planning and specification content**, preserved for grading and historical context.
+
+---
+
 # Milestone 1 - **Micro-Habit Coach** (Unit 7)
 
 ## Table of Contents

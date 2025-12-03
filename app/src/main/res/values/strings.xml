@@ -116,5 +116,25 @@
     <!-- Explore/Suggestions -->
     <string name="fit_score">Fit Score:</string>
     <string name="turn_into_habit">Turn into Habit</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_streak">Streak Reminders</string>
+    <string name="notification_channel_streak_description">Notifications about expiring streaks</string>
+    <string name="notification_channel_inactivity">Activity Reminders</string>
+    <string name="notification_channel_inactivity_description">Reminders when you\'ve been inactive</string>
+    <string name="notification_channel_geofence">Location Reminders</string>
+    <string name="notification_channel_geofence_description">Reminders when you arrive at specific locations</string>
+    <string name="notification_channel_reminders">Habit Reminders</string>
+    <string name="notification_channel_reminders_description">Scheduled habit reminders</string>
+    
+    <string name="notification_streak_title">Save your streak: %1$s</string>
+    <string name="notification_streak_message">You have %1$d hour(s) left to complete this habit and save your streak!</string>
+    <string name="notification_inactivity_title">Time to move!</string>
+    <string name="notification_inactivity_message">You\'ve been still for 2 hours. Time for a quick activity break?</string>
+    <string name="notification_geofence_title">%1$s reminder</string>
+    <string name="notification_geofence_message">You\'re at the location for %1$s. Don\'t forget to complete it!</string>
+    
+    <string name="mark_done">Mark Done</string>
+    <string name="snooze">Snooze</string>
 </resources>
 

@@ -121,7 +121,12 @@ class ExploreFragment : Fragment() {
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.isVisible = isLoading
-            binding.swipeRefreshLayout.isRefreshing = isLoading
+            // Only update swipe refresh if it's actually refreshing (not just loading from cache)
+            if (isLoading) {
+                binding.swipeRefreshLayout.isRefreshing = true
+            } else {
+                binding.swipeRefreshLayout.isRefreshing = false
+            }
             
             // Hide error while loading
             if (isLoading) {

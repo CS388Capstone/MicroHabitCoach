@@ -81,6 +81,48 @@ data class ChartData(
 )
 
 /**
+ * Data class for habit performance breakdown.
+ */
+data class HabitPerformance(
+    val habitId: String,
+    val habitName: String,
+    val completionRate: Double,
+    val streakCount: Int,
+    val totalCompletions: Int,
+    val daysSinceCreation: Int
+)
+
+/**
+ * Data class for weekly comparison.
+ */
+data class WeeklyComparison(
+    val thisWeekCompletions: Int,
+    val lastWeekCompletions: Int,
+    val thisWeekRate: Double,
+    val lastWeekRate: Double,
+    val changePercent: Double // Positive = improvement, negative = decline
+)
+
+/**
+ * Data class for consistency score.
+ */
+data class ConsistencyScore(
+    val score: Int, // 0-100
+    val grade: String, // A+, A, B+, B, C+, C, D, F
+    val description: String
+)
+
+/**
+ * Data class for category performance.
+ */
+data class CategoryPerformance(
+    val category: HabitCategory,
+    val habitCount: Int,
+    val averageCompletionRate: Double,
+    val totalCompletions: Int
+)
+
+/**
  * Complete profile statistics data.
  */
 data class ProfileStatsData(

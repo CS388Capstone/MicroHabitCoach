@@ -48,7 +48,9 @@ class ExploreViewModel(
     // Cache refresh settings
     private val CACHE_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000L // 6 hours
     private val CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000L // 24 hours
-    private var refreshJob: Job? = null
+    private var periodicRefreshJob: Job? = null
+
+    private var observeJob: Job? = null
 
     init {
         // Observe cached suggestions from Room
@@ -66,23 +68,37 @@ class ExploreViewModel(
      * Suggestions are automatically sorted by FitScore.
      */
     private fun observeCachedSuggestions() {
-        viewModelScope.launch {
+        // Cancel existing observation if any
+        observeJob?.cancel()
+        
+        observeJob = viewModelScope.launch {
             apiSuggestionDao.getAllSuggestions()
                 .catch { e ->
                     _error.value = "Failed to load cached suggestions: ${e.message}"
                 }
                 .collect { cachedSuggestions ->
-                    _suggestions.value = cachedSuggestions
+                    // Only update if the list actually changed to prevent infinite loops
+                    val currentSuggestions = _suggestions.value
+                    if (currentSuggestions == null || 
+                        currentSuggestions.size != cachedSuggestions.size || 
+                        currentSuggestions != cachedSuggestions) {
+                        _suggestions.value = cachedSuggestions
+                    }
                 }
         }
     }
+
+    private var loadJob: Job? = null
 
     /**
      * Loads suggestions from API, classifies them, calculates FitScore, and caches them.
      * Uses cached data if available and fresh, otherwise fetches from API.
      */
     fun loadSuggestions() {
-        viewModelScope.launch {
+        // Prevent multiple simultaneous loads
+        if (loadJob?.isActive == true) return
+        
+        loadJob = viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             
@@ -110,12 +126,17 @@ class ExploreViewModel(
         }
     }
 
+    private var refreshJob: Job? = null
+
     /**
      * Forces a refresh of suggestions from the API.
      * Fetches, classifies, scores, and caches new suggestions.
      */
     fun refreshSuggestions() {
-        viewModelScope.launch {
+        // Prevent multiple simultaneous refreshes
+        if (refreshJob?.isActive == true) return
+        
+        refreshJob = viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             
@@ -345,8 +366,8 @@ class ExploreViewModel(
      * Refreshes every 6 hours to reduce API calls.
      */
     private fun startPeriodicRefresh() {
-        refreshJob?.cancel()
-        refreshJob = viewModelScope.launch {
+        periodicRefreshJob?.cancel()
+        periodicRefreshJob = viewModelScope.launch {
             while (true) {
                 delay(CACHE_REFRESH_INTERVAL_MS)
                 refreshSuggestions()
@@ -363,7 +384,10 @@ class ExploreViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        observeJob?.cancel()
+        loadJob?.cancel()
         refreshJob?.cancel()
+        periodicRefreshJob?.cancel()
     }
 
     class Factory(

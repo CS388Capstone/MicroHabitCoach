@@ -151,5 +151,45 @@
     <string name="saved_articles">Saved Articles</string>
     <string name="no_saved_articles">No saved articles yet. Save articles from the Explore screen to view them here.</string>
     <string name="view_article">View Article</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="notification_preferences">Notification Preferences</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="quiet_hours">Quiet Hours</string>
+    <string name="quiet_hours_start">Start Time</string>
+    <string name="quiet_hours_end">End Time</string>
+    <string name="quiet_hours_not_set">Not set</string>
+    <string name="permission_management">Permissions</string>
+    <string name="motion_permission">Motion Detection</string>
+    <string name="location_permission">Location</string>
+    <string name="notification_permission">Notifications</string>
+    <string name="permission_granted">Granted</string>
+    <string name="permission_denied">Denied</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="data_management">Data Management</string>
+    <string name="clear_completion_history">Clear Completion History</string>
+    <string name="reset_all_streaks">Reset All Streaks</string>
+    <string name="clear_history_confirmation">Are you sure you want to clear all completion history? This action cannot be undone.</string>
+    <string name="reset_streaks_confirmation">Are you sure you want to reset all streaks? This action cannot be undone.</string>
+    <string name="battery_optimization">Battery Optimization</string>
+    <string name="battery_optimization_mode">Battery-Friendly Mode</string>
+    <string name="battery_optimization_description">Reduces sensor polling and background activity to save battery</string>
+    <string name="about">About</string>
+    <string name="app_version">App Version</string>
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="notifications_disabled">Notifications disabled</string>
+    <string name="quiet_hours_updated">Quiet hours updated</string>
+    <string name="battery_optimization_enabled">Battery optimization enabled</string>
+    <string name="battery_optimization_disabled">Battery optimization disabled</string>
+    <string name="completion_history_cleared">Completion history cleared</string>
+    <string name="all_streaks_reset">All streaks reset</string>
+    
+    <!-- Stats -->
+    <string name="days_active">Days Active</string>
+    <string name="perfect_days">Perfect Days</string>
+    <string name="average_completions_per_day">Avg. Completions/Day</string>
+    <string name="days_active_format">%1$d days</string>
+    <string name="perfect_days_format">%1$d days</string>
 </resources>
 

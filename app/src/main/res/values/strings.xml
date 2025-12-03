@@ -110,6 +110,10 @@
     <string name="permission_activity_recognition_explanation">We need motion permission to automatically complete your walking, running, or exercise habits when you meet your goals.</string>
     <string name="permission_location_explanation">We need location permission to send you reminders when you arrive at specific places, like reminding you to hydrate when you reach the gym.</string>
     <string name="permission_notification_explanation">We need notification permission to send you habit reminders and streak countdown alerts to help you stay on track.</string>
+    <string name="permission_background_location_explanation">To trigger location-based habits reliably in the background, allow location \"All the time\" in system settings.</string>
+
+    <!-- Geofence diagnostics -->
+    <string name="geofence_limit_warning">Some location habits may not have active geofences because the system geofence limit was reached.</string>
 
     <!-- Navigation -->
     <string name="explore">Explore</string>

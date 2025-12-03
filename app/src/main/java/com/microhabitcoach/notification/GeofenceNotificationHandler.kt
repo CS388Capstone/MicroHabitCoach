@@ -3,7 +3,7 @@ package com.microhabitcoach.notification
 import android.content.Context
 import android.util.Log
 import com.microhabitcoach.data.database.DatabaseModule
-import com.microhabitcoach.data.database.entity.Habit
+import com.microhabitcoach.data.repository.DefaultHabitRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,8 +13,10 @@ import kotlinx.coroutines.launch
  * Handles geofence-triggered notifications.
  */
 object GeofenceNotificationHandler {
-    
+
     private const val TAG = "GeofenceNotificationHandler"
+    // For now we default to notify-only; this flag enables future auto-complete behavior.
+    private const val AUTO_COMPLETE_LOCATION_ON_ENTRY = false
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     /**
@@ -32,7 +34,7 @@ object GeofenceNotificationHandler {
                 
                 // Query habit by ID (geofence request ID = habit ID)
                 val habit = habitDao.getHabitById(habitId)
-                
+
                 if (habit == null) {
                     Log.w(TAG, "Habit $habitId not found - may have been deleted")
                     return@launch
@@ -49,12 +51,19 @@ object GeofenceNotificationHandler {
                     Log.w(TAG, "Habit $habitId is not location-based")
                     return@launch
                 }
-                
-                // Show notification
-                val notificationManager = HabitNotificationManager.getInstance(context)
-                notificationManager.showGeofenceNotification(habit)
-                
-                Log.d(TAG, "Geofence notification shown for habit: ${habit.name}")
+
+                val repository = DefaultHabitRepository(habitDao, database.completionDao())
+
+                if (AUTO_COMPLETE_LOCATION_ON_ENTRY) {
+                    // Auto-complete the habit instead of (or in addition to) showing a notification
+                    repository.autoCompleteLocationHabit(habit.id)
+                    Log.d(TAG, "Auto-completed location habit from geofence: ${habit.name}")
+                } else {
+                    // Show notification (default behavior)
+                    val notificationManager = HabitNotificationManager.getInstance(context)
+                    notificationManager.showGeofenceNotification(habit)
+                    Log.d(TAG, "Geofence notification shown for habit: ${habit.name}")
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling geofence trigger for habit: $habitId", e)
             }

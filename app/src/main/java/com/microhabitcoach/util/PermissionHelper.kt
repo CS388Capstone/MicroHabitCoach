@@ -26,13 +26,29 @@ object PermissionHelper {
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        
+
         val coarseLocation = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-        
+
         return fineLocation || coarseLocation
+    }
+
+    /**
+     * Returns true if the app has background location access.
+     * On Android 10+ this requires ACCESS_BACKGROUND_LOCATION.
+     * On older versions, foreground location implies background.
+     */
+    fun hasBackgroundLocationPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            hasLocationPermission(context)
+        }
     }
 
     fun hasNotificationPermission(context: Context): Boolean {
@@ -52,6 +68,10 @@ object PermissionHelper {
 
     fun getLocationPermissionExplanation(context: Context): String {
         return context.getString(R.string.permission_location_explanation)
+    }
+
+    fun getBackgroundLocationPermissionExplanation(context: Context): String {
+        return context.getString(R.string.permission_background_location_explanation)
     }
 
     fun getNotificationPermissionExplanation(context: Context): String {

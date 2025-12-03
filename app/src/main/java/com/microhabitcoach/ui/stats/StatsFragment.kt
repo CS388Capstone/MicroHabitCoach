@@ -271,8 +271,9 @@ class StatsFragment : Fragment() {
         val colorMap = mapOf(
             HabitCategory.FITNESS to Color.parseColor("#FF5722"),
             HabitCategory.WELLNESS to Color.parseColor("#4CAF50"),
+            HabitCategory.HEALTHY_EATING to Color.parseColor("#FF9800"), // Orange for healthy eating
             HabitCategory.PRODUCTIVITY to Color.parseColor("#2196F3"),
-            HabitCategory.LEARNING to Color.parseColor("#FF9800"),
+            HabitCategory.LEARNING to Color.parseColor("#9C27B0"), // Purple for learning
             HabitCategory.GENERAL to Color.parseColor("#9E9E9E")
         )
         return categories.map { colorMap.getOrDefault(it, Color.GRAY) }

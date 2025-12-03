@@ -52,9 +52,11 @@ object HabitTypeInferrer {
         }
         
         // Category-based inference as fallback
-        return when (suggestion.category) {
+        val category = suggestion.category ?: HabitCategory.GENERAL
+        return when (category) {
             HabitCategory.FITNESS -> HabitType.MOTION // Fitness activities are often motion-based
             HabitCategory.WELLNESS -> HabitType.TIME // Wellness activities are often time-based
+            HabitCategory.HEALTHY_EATING -> HabitType.TIME // Healthy eating habits are time-based (meal times)
             HabitCategory.PRODUCTIVITY -> HabitType.TIME // Productivity habits are often time-based
             HabitCategory.LEARNING -> HabitType.TIME // Learning habits are often time-based
             HabitCategory.GENERAL -> HabitType.TIME // Default to time-based

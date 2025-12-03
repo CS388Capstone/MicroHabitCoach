@@ -34,8 +34,10 @@ android {
         
         // Get News API key from local.properties, fallback to hardcoded value if not found
         val newsApiKey = localProperties.getProperty("NEWS_API_KEY") ?: "a701b5e8540e46dc88878a0da91a4c94"
+        val openWeatherApiKey = localProperties.getProperty("OPEN_WEATHER_API_KEY") ?: ""
         
         buildConfigField("String", "NEWS_API_KEY", "\"$newsApiKey\"")
+        buildConfigField("String", "OPEN_WEATHER_API_KEY", "\"$openWeatherApiKey\"")
     }
 
     buildTypes {

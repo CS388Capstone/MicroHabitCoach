@@ -6,30 +6,198 @@
     android:layout_height="match_parent"
     tools:context=".ui.explore.ExploreFragment">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewSuggestions"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardWeather"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="16dp"
-            tools:listitem="@layout/item_habit" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:id="@+id/weatherStatusRoot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvWeatherTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/weather_card_title"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    android:textAllCaps="true"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/ivWeatherImpact"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:contentDescription="@string/weather_card_title"
+                        android:src="@android:drawable/ic_menu_compass" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvWeatherCondition"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                            android:textStyle="bold"
+                            tools:text="Sunny" />
+
+                        <TextView
+                            android:id="@+id/tvWeatherTemperature"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                            android:visibility="gone"
+                            tools:text="24°C / 75°F"
+                            tools:visibility="visible" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvWeatherImpact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    tools:text="Clear skies boost outdoor workouts (+10 FitScore)." />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Category Filter Chips -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupCategoryFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterAll"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/filter_all" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterFitness"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_fitness" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterHealthyEating"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_healthy_eating" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterWellness"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_wellness" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterProductivity"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_productivity" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterLearning"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_learning" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewSuggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="16dp"
+                    tools:listitem="@layout/item_habit" />
+
+                <TextView
+                    android:id="@+id/tvError"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="16dp"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    android:visibility="gone"
+                    tools:text="Error loading suggestions"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <TextView
-            android:id="@+id/tvError"
+            android:id="@+id/btnFitScoreInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="16dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            android:visibility="gone"
-            tools:text="Error loading suggestions"
-            tools:visibility="visible" />
+            android:layout_margin="16dp"
+            android:text="@string/fit_score_info_cta"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            android:textColor="@color/weather_neutral_text" />
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <Button
+            android:id="@+id/btnLoadMore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/load_more"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"

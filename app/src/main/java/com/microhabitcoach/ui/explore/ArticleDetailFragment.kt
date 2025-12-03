@@ -12,9 +12,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.microhabitcoach.R
+import com.microhabitcoach.data.model.HabitCategory
 import com.microhabitcoach.data.util.HabitTypeInferrer
 import com.microhabitcoach.databinding.FragmentArticleDetailBinding
 import kotlinx.coroutines.launch
@@ -45,14 +45,8 @@ class ArticleDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupToolbar()
         setupButtons()
         observeViewModel()
-    }
-
-    private fun setupToolbar() {
-        // Setup toolbar with Navigation Component for automatic back button handling
-        binding.toolbar.setupWithNavController(findNavController())
     }
 
     private fun setupButtons() {
@@ -112,8 +106,8 @@ class ArticleDetailFragment : Fragment() {
                 tvArticleAuthor.isVisible = false
             }
 
-            // Category
-            chipCategory.text = suggestion.category.name.lowercase().replaceFirstChar { it.uppercase() }
+            // Category (handle null as "General")
+            chipCategory.text = suggestion.category?.displayName() ?: "General"
 
             // Content
             val content = suggestion.content ?: suggestion.title
@@ -172,10 +166,11 @@ class ArticleDetailFragment : Fragment() {
         val inferredType = HabitTypeInferrer.inferType(suggestion)
 
         // Navigate to AddEditHabitFragment with suggestion data
+        val category = suggestion.category ?: HabitCategory.GENERAL
         val action = ArticleDetailFragmentDirections.actionArticleDetailFragmentToAddEditHabitFragment(
             habitId = null,
             suggestionName = suggestion.title,
-            suggestionCategory = suggestion.category.name,
+            suggestionCategory = category.name,
             suggestionType = inferredType.name.lowercase()
         )
         findNavController().navigate(action)

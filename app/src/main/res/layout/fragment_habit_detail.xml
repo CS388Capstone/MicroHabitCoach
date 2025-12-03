@@ -6,19 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.habitdetail.HabitDetailFragment">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="@string/habit_detail" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -258,12 +245,95 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
 
+                    <!-- Weekday header row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:weightSum="7"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/monday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/tuesday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/wednesday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/thursday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/friday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/saturday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/sunday_short"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                            android:textAllCaps="true" />
+
+                    </LinearLayout>
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewCalendar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="false"
                         tools:listitem="@layout/item_calendar_day" />
+
+                    <!-- Legend -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:text="● Completed   ○ Missed"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
 

@@ -95,7 +95,7 @@ class TodayViewModel(
         viewModelScope.launch {
             try {
                 // Cancel reminder notifications before deleting
-                ReminderScheduler.cancelHabitReminders(application, id)
+                ReminderScheduler.cancelHabitReminders(getApplication(), id)
                 
                 // Remove geofence before deleting
                 GeofenceService.removeGeofence(application, id)

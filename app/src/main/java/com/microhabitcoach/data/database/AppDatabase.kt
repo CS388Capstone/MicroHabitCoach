@@ -22,7 +22,7 @@ import com.microhabitcoach.data.database.entity.UserPreferences
         SavedArticle::class,
         UserPreferences::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(

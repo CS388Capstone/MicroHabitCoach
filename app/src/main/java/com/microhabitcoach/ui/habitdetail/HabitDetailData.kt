@@ -47,7 +47,8 @@ data class BestDayInfo(
 data class CalendarDayData(
     val date: Long, // Timestamp for the day
     val hasCompletion: Boolean,
-    val completion: Completion? = null
+    val completion: Completion? = null,
+    val isPlaceholder: Boolean = false
 )
 
 /**

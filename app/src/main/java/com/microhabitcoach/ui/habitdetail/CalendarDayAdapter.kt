@@ -2,13 +2,13 @@ package com.microhabitcoach.ui.habitdetail
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.microhabitcoach.R
 import com.microhabitcoach.databinding.ItemCalendarDayBinding
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 class CalendarDayAdapter : ListAdapter<CalendarDayData, CalendarDayAdapter.CalendarDayViewHolder>(
     CalendarDayDiffCallback()
@@ -32,6 +32,19 @@ class CalendarDayAdapter : ListAdapter<CalendarDayData, CalendarDayAdapter.Calen
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(dayData: CalendarDayData) {
+            val context = binding.root.context
+
+            if (dayData.isPlaceholder) {
+                binding.tvDay.text = ""
+                binding.root.setCardBackgroundColor(
+                    ContextCompat.getColor(context, android.R.color.transparent)
+                )
+                binding.tvDay.setTextColor(
+                    ContextCompat.getColor(context, android.R.color.darker_gray)
+                )
+                return
+            }
+
             val calendar = Calendar.getInstance().apply {
                 timeInMillis = dayData.date
             }
@@ -40,21 +53,17 @@ class CalendarDayAdapter : ListAdapter<CalendarDayData, CalendarDayAdapter.Calen
             val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
             binding.tvDay.text = dayOfMonth.toString()
             
-            // Highlight days with completions
+            val completedBg = ContextCompat.getColor(context, R.color.weather_positive_bg)
+            val completedText = ContextCompat.getColor(context, android.R.color.white)
+            val defaultBg = ContextCompat.getColor(context, android.R.color.transparent)
+            val defaultText = ContextCompat.getColor(context, android.R.color.black)
+
             if (dayData.hasCompletion) {
-                binding.root.setCardBackgroundColor(
-                    binding.root.context.getColor(android.R.color.holo_green_light)
-                )
-                binding.tvDay.setTextColor(
-                    binding.root.context.getColor(android.R.color.white)
-                )
+                binding.root.setCardBackgroundColor(completedBg)
+                binding.tvDay.setTextColor(completedText)
             } else {
-                binding.root.setCardBackgroundColor(
-                    binding.root.context.getColor(android.R.color.transparent)
-                )
-                binding.tvDay.setTextColor(
-                    binding.root.context.getColor(android.R.color.black)
-                )
+                binding.root.setCardBackgroundColor(defaultBg)
+                binding.tvDay.setTextColor(defaultText)
             }
         }
     }

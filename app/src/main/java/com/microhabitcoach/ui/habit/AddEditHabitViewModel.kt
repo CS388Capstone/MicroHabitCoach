@@ -111,7 +111,7 @@ class AddEditHabitViewModel(
                 _habit.value = habit
                 
                 // Schedule reminder notifications for time-based habits
-                ReminderScheduler.rescheduleHabitReminders(application, habit)
+                ReminderScheduler.rescheduleHabitReminders(getApplication(), habit)
                 
                 // Create/update geofence for location-based habits
                 if (habit.type == HabitType.LOCATION && habit.location != null && habit.geofenceRadius != null) {
@@ -135,7 +135,7 @@ class AddEditHabitViewModel(
                 _saveState.value = SaveState.Saving
                 
                 // Cancel reminder notifications before deleting
-                ReminderScheduler.cancelHabitReminders(application, id)
+                ReminderScheduler.cancelHabitReminders(getApplication(), id)
                 
                 // Remove geofence before deleting
                 GeofenceService.removeGeofence(application, id)

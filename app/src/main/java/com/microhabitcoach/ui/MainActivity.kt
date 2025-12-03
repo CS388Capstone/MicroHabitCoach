@@ -54,6 +54,11 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
     }
     
+    override fun onSupportNavigateUp(): Boolean {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.navHostFragment) as? NavHostFragment
+        return navHostFragment?.navController?.navigateUp() ?: super.onSupportNavigateUp()
+    }
+    
     private fun testDatabase() {
         activityScope.launch {
             try {

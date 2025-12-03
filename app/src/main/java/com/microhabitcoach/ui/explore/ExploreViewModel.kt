@@ -123,7 +123,7 @@ class ExploreViewModel(
                 // Build UserContext for FitScore calculation
                 val userContext = buildUserContext()
                 
-                // Fetch suggestions from API
+                // Fetch suggestions from API with timeout
                 val apiResult = withContext(Dispatchers.IO) {
                     apiRepository.fetchSuggestions()
                 }
@@ -132,32 +132,137 @@ class ExploreViewModel(
                     apiResult.isSuccess -> {
                         val rawSuggestions = apiResult.getOrNull() ?: emptyList()
                         
+                        android.util.Log.d("ExploreViewModel", "=== PROCESSING SUGGESTIONS ===")
+                        android.util.Log.d("ExploreViewModel", "Raw suggestions received: ${rawSuggestions.size}")
+                        
+                        // Separate by source for comparison
+                        val hackerNewsSuggestions = rawSuggestions.filter { it.source == "hacker_news" }
+                        val newsApiSuggestions = rawSuggestions.filter { it.source == "news_api" }
+                        
+                        android.util.Log.d("ExploreViewModel", "  - Hacker News: ${hackerNewsSuggestions.size}")
+                        android.util.Log.d("ExploreViewModel", "  - News API: ${newsApiSuggestions.size}")
+                        
                         // Process suggestions: classify and calculate FitScore
                         val processedSuggestions = withContext(Dispatchers.Default) {
                             processSuggestions(rawSuggestions, userContext)
                         }
                         
-                        // Cache processed suggestions
-                        if (processedSuggestions.isNotEmpty()) {
-                            withContext(Dispatchers.IO) {
-                                // Clean up expired suggestions
-                                apiSuggestionDao.deleteExpiredSuggestions()
-                                
-                                // Insert new suggestions
-                                apiRepository.cacheSuggestions(processedSuggestions)
+                        // Compare classification quality by source
+                        val processedHn = processedSuggestions.filter { it.source == "hacker_news" }
+                        val processedNews = processedSuggestions.filter { it.source == "news_api" }
+                        
+                        val hnAvgFitScore = if (processedHn.isNotEmpty()) {
+                            processedHn.map { it.fitScore }.average()
+                        } else 0.0
+                        val newsAvgFitScore = if (processedNews.isNotEmpty()) {
+                            processedNews.map { it.fitScore }.average()
+                        } else 0.0
+                        
+                        android.util.Log.d("ExploreViewModel", "=== CLASSIFICATION QUALITY COMPARISON ===")
+                        android.util.Log.d("ExploreViewModel", "Hacker News: ${processedHn.size} suggestions, avg FitScore: ${"%.1f".format(hnAvgFitScore)}")
+                        processedHn.groupBy { it.category }.forEach { (category, suggestions) ->
+                            val avgScore = suggestions.map { it.fitScore }.average()
+                            android.util.Log.d("ExploreViewModel", "  - $category: ${suggestions.size} (avg FitScore: ${"%.1f".format(avgScore)})")
+                        }
+                        android.util.Log.d("ExploreViewModel", "News API: ${processedNews.size} suggestions, avg FitScore: ${"%.1f".format(newsAvgFitScore)}")
+                        processedNews.groupBy { it.category }.forEach { (category, suggestions) ->
+                            val avgScore = suggestions.map { it.fitScore }.average()
+                            android.util.Log.d("ExploreViewModel", "  - $category: ${suggestions.size} (avg FitScore: ${"%.1f".format(avgScore)})")
+                        }
+                        android.util.Log.d("ExploreViewModel", "=======================================")
+                        
+                        // Log top suggestions by FitScore
+                        android.util.Log.d("ExploreViewModel", "Top 20 FitScores (sorted):")
+                        processedSuggestions.take(20).forEachIndexed { index, suggestion ->
+                            android.util.Log.d("ExploreViewModel", "  ${index + 1}. [${suggestion.fitScore}] [${suggestion.source}] ${suggestion.title.take(45)} (${suggestion.category})")
+                        }
+                        
+                        // Take top 10 by FitScore for display
+                        val topSuggestions = processedSuggestions.take(10)
+                        
+                        android.util.Log.d("ExploreViewModel", "=== TOP 10 SELECTED ===")
+                        topSuggestions.forEachIndexed { index, suggestion ->
+                            android.util.Log.d("ExploreViewModel", "  ${index + 1}. [${suggestion.fitScore}] [${suggestion.source}] ${suggestion.title.take(50)}")
+                        }
+                        android.util.Log.d("ExploreViewModel", "========================")
+                        
+                        // Cache processed suggestions (even if empty, to prevent repeated API calls)
+                        withContext(Dispatchers.IO) {
+                            // Clear ALL old suggestions to get fresh data on refresh
+                            apiSuggestionDao.deleteAllSuggestions()
+                            
+                            // Insert top 10 suggestions for display
+                            if (topSuggestions.isNotEmpty()) {
+                                apiRepository.cacheSuggestions(topSuggestions)
                             }
                         }
                         
+                        android.util.Log.d("ExploreViewModel", "Refreshed: ${topSuggestions.size} top suggestions loaded")
                         _isLoading.value = false
                     }
                     apiResult.isFailure -> {
                         val exception = apiResult.exceptionOrNull()
-                        _error.value = "API error: ${exception?.message ?: "Unknown error"}"
+                        val errorMessage = exception?.message ?: "Unknown error"
+                        android.util.Log.e("ExploreViewModel", "API error: $errorMessage", exception)
+                        
+                        // Try to load cached data as fallback
+                        val cachedSuggestions = withContext(Dispatchers.IO) {
+                            apiSuggestionDao.getValidSuggestions(
+                                currentTime = System.currentTimeMillis(),
+                                limit = 50
+                            )
+                        }
+                        
+                        if (cachedSuggestions.isNotEmpty()) {
+                            // Show cached data with a warning
+                            _error.value = "Using cached data. ${errorMessage}"
+                        } else {
+                            // No cached data - try mock data for development/testing
+                            android.util.Log.w("ExploreViewModel", "No cached data, using mock suggestions for testing")
+                            val mockSuggestions = withContext(Dispatchers.IO) {
+                                apiRepository.getMockSuggestions()
+                            }
+                            
+                            if (mockSuggestions.isNotEmpty()) {
+                                // Process mock suggestions with FitScore
+                                val processedMock = withContext(Dispatchers.Default) {
+                                    processSuggestions(mockSuggestions, userContext)
+                                }
+                                
+                                // Cache mock suggestions
+                                withContext(Dispatchers.IO) {
+                                    apiRepository.cacheSuggestions(processedMock)
+                                }
+                                
+                                _error.value = "Using demo data. ${errorMessage}"
+                            } else {
+                                // No data available at all
+                                _error.value = "Failed to load suggestions: ${errorMessage}"
+                            }
+                        }
                         _isLoading.value = false
                     }
                 }
             } catch (e: Exception) {
-                _error.value = "Failed to refresh suggestions: ${e.message}"
+                android.util.Log.e("ExploreViewModel", "Error in refreshSuggestions: ${e.message}", e)
+                
+                // Try to load cached data as fallback
+                try {
+                    val cachedSuggestions = withContext(Dispatchers.IO) {
+                        apiSuggestionDao.getValidSuggestions(
+                            currentTime = System.currentTimeMillis(),
+                            limit = 50
+                        )
+                    }
+                    
+                    if (cachedSuggestions.isNotEmpty()) {
+                        _error.value = "Using cached data. Error: ${e.message}"
+                    } else {
+                        _error.value = "Failed to refresh suggestions: ${e.message}"
+                    }
+                } catch (cacheError: Exception) {
+                    _error.value = "Failed to refresh suggestions: ${e.message}"
+                }
                 _isLoading.value = false
             }
         }

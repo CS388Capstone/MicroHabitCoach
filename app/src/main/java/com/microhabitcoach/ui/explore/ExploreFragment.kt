@@ -39,16 +39,41 @@ class ExploreFragment : Fragment() {
 
         setupRecyclerView()
         setupPullToRefresh()
+        setupToolbar()
         observeViewModel()
         viewModel.loadSuggestions()
     }
 
-    private fun setupRecyclerView() {
-        suggestionAdapter = SuggestionAdapter { suggestion ->
-            navigateToAddEditHabit(suggestion)
+    private fun setupToolbar() {
+        // Setup FAB to navigate to Saved Articles
+        binding.fabSavedArticles.setOnClickListener {
+            navigateToSavedArticles()
         }
+    }
+
+    private fun navigateToSavedArticles() {
+        val action = ExploreFragmentDirections.actionExploreFragmentToSavedArticlesFragment()
+        findNavController().navigate(action)
+    }
+
+    private fun setupRecyclerView() {
+        suggestionAdapter = SuggestionAdapter(
+            onViewDetailsClick = { suggestion ->
+                navigateToArticleDetail(suggestion)
+            },
+            onTurnIntoHabitClick = { suggestion ->
+                navigateToAddEditHabit(suggestion)
+            }
+        )
         binding.recyclerViewSuggestions.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewSuggestions.adapter = suggestionAdapter
+    }
+
+    private fun navigateToArticleDetail(suggestion: ApiSuggestion) {
+        val action = ExploreFragmentDirections.actionExploreFragmentToArticleDetailFragment(
+            suggestionId = suggestion.id
+        )
+        findNavController().navigate(action)
     }
 
     private fun navigateToAddEditHabit(suggestion: ApiSuggestion) {
@@ -77,13 +102,31 @@ class ExploreFragment : Fragment() {
         viewModel.suggestions.observe(viewLifecycleOwner) { suggestions ->
             suggestionAdapter.submitList(suggestions)
             val isLoading = viewModel.isLoading.value ?: false
+            val hasError = viewModel.error.value != null
+            
             binding.recyclerViewSuggestions.isVisible = suggestions.isNotEmpty()
-            binding.tvError.isVisible = suggestions.isEmpty() && !isLoading
+            
+            // Show error message if no suggestions and not loading
+            if (suggestions.isEmpty() && !isLoading) {
+                if (!hasError) {
+                    // No error but no suggestions - show helpful message
+                    binding.tvError.text = "No relevant suggestions found. Try refreshing or check back later."
+                }
+                binding.tvError.isVisible = true
+            } else if (suggestions.isNotEmpty()) {
+                // Hide error if we have suggestions
+                binding.tvError.isVisible = false
+            }
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.isVisible = isLoading
             binding.swipeRefreshLayout.isRefreshing = isLoading
+            
+            // Hide error while loading
+            if (isLoading) {
+                binding.tvError.isVisible = false
+            }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -92,7 +135,11 @@ class ExploreFragment : Fragment() {
                 binding.tvError.isVisible = true
                 viewModel.clearError()
             } ?: run {
-                binding.tvError.isVisible = false
+                // Only hide error if we have suggestions
+                val suggestions = viewModel.suggestions.value ?: emptyList()
+                if (suggestions.isNotEmpty()) {
+                    binding.tvError.isVisible = false
+                }
             }
         }
     }

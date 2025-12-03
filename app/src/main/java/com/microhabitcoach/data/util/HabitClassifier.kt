@@ -47,26 +47,35 @@ object HabitClassifier {
         val text = (title + " " + (content ?: "")).lowercase()
         
         // Check fitness keywords first (most specific)
-        if (fitnessKeywords.any { text.contains(it) }) {
+        val fitnessMatch = fitnessKeywords.firstOrNull { text.contains(it) }
+        if (fitnessMatch != null) {
+            android.util.Log.d("HabitClassifier", "Classified as FITNESS: '$title' (matched: $fitnessMatch)")
             return HabitCategory.FITNESS
         }
         
         // Check wellness keywords
-        if (wellnessKeywords.any { text.contains(it) }) {
+        val wellnessMatch = wellnessKeywords.firstOrNull { text.contains(it) }
+        if (wellnessMatch != null) {
+            android.util.Log.d("HabitClassifier", "Classified as WELLNESS: '$title' (matched: $wellnessMatch)")
             return HabitCategory.WELLNESS
         }
         
         // Check productivity keywords
-        if (productivityKeywords.any { text.contains(it) }) {
+        val productivityMatch = productivityKeywords.firstOrNull { text.contains(it) }
+        if (productivityMatch != null) {
+            android.util.Log.d("HabitClassifier", "Classified as PRODUCTIVITY: '$title' (matched: $productivityMatch)")
             return HabitCategory.PRODUCTIVITY
         }
         
         // Check learning keywords
-        if (learningKeywords.any { text.contains(it) }) {
+        val learningMatch = learningKeywords.firstOrNull { text.contains(it) }
+        if (learningMatch != null) {
+            android.util.Log.d("HabitClassifier", "Classified as LEARNING: '$title' (matched: $learningMatch)")
             return HabitCategory.LEARNING
         }
         
         // Default to general if no match
+        android.util.Log.d("HabitClassifier", "Classified as GENERAL: '$title' (no keyword match)")
         return HabitCategory.GENERAL
     }
 }

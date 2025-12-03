@@ -30,9 +30,18 @@ object FitScoreCalculator {
     fun calculate(suggestion: ApiSuggestion, context: UserContext): Int {
         var score = BASE_SCORE
         
-        // Category match (+20)
+        // Category match (+20) - Most important factor
         if (suggestion.category in context.preferredCategories) {
             score += CATEGORY_MATCH_BONUS
+        }
+        
+        // Boost score for specific categories that are more actionable
+        when (suggestion.category) {
+            HabitCategory.FITNESS -> score += 5 // Fitness habits are highly actionable
+            HabitCategory.WELLNESS -> score += 5 // Wellness habits are highly actionable
+            HabitCategory.PRODUCTIVITY -> score += 3 // Productivity habits are actionable
+            HabitCategory.LEARNING -> score += 2 // Learning habits are actionable
+            HabitCategory.GENERAL -> score -= 5 // General is less specific, reduce score
         }
         
         // Time appropriateness (+15)
@@ -55,6 +64,13 @@ object FitScoreCalculator {
         // Motion state match (+10)
         if (isMotionStateAppropriate(suggestion, context.recentMotionState)) {
             score += MOTION_STATE_MATCH_BONUS
+        }
+        
+        // Boost score if title contains actionable words (makes it a better habit)
+        val titleLower = suggestion.title.lowercase()
+        val actionableWords = listOf("daily", "every day", "routine", "practice", "habit", "exercise", "workout", "meditation", "read", "learn")
+        if (actionableWords.any { titleLower.contains(it) }) {
+            score += 5
         }
         
         return score.coerceIn(0, 100)

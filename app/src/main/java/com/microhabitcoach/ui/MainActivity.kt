@@ -67,11 +67,30 @@ class MainActivity : AppCompatActivity() {
                 val database = DatabaseModule.getDatabase(applicationContext)
                 database.habitDao() // Access DAO to initialize database
                 
+                // Initialize default user preferences on first launch
+                initializeUserPreferences()
+                
                 // Database initialized successfully - app is ready
                 // (UI updates can be added later when binding is working)
                 
             } catch (e: Exception) {
                 // Error handling - can add UI feedback later
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Initializes default user preferences on first app launch.
+     * This ensures preferences are available for FitScore calculation and other features.
+     */
+    private fun initializeUserPreferences() {
+        activityScope.launch {
+            try {
+                val preferencesRepository = com.microhabitcoach.data.repository.PreferencesRepository(applicationContext)
+                preferencesRepository.initializeDefaultsIfNeeded()
+            } catch (e: Exception) {
+                // Log error but don't crash the app
                 e.printStackTrace()
             }
         }

@@ -32,6 +32,9 @@ object GeofenceService {
     private var geofencingClient: GeofencingClient? = null
     private var pendingIntent: PendingIntent? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    // Tracks whether we recently hit the geofence limit so UI can surface a warning.
+    @Volatile
+    var lastGeofenceLimitHit: Boolean = false
     
     /**
      * Initializes the geofencing client.
@@ -186,6 +189,7 @@ object GeofenceService {
                 // Check geofence limit
                 if (locationHabits.size > MAX_GEOFENCES) {
                     Log.w(TAG, "Too many location habits (${locationHabits.size}). Android limit is $MAX_GEOFENCES. Only first $MAX_GEOFENCES will have geofences.")
+                    lastGeofenceLimitHit = true
                 }
                 
                 // Remove all existing geofences first

@@ -15,6 +15,7 @@ interface HabitRepository {
     suspend fun saveHabit(habit: Habit)
     suspend fun completeHabit(habitId: String)
     suspend fun autoCompleteMotionHabit(habitId: String)
+    suspend fun autoCompleteLocationHabit(habitId: String)
     suspend fun deleteHabit(id: String)
     suspend fun isHabitCompletedToday(habitId: String): Boolean
     suspend fun clearAllCompletions()
@@ -86,6 +87,34 @@ class DefaultHabitRepository(
             )
             completionDao.insertCompletion(completion)
             
+            // Update streak count
+            val updatedHabit = habit.copy(
+                streakCount = habit.streakCount + 1,
+                updatedAt = now
+            )
+            habitDao.updateHabit(updatedHabit)
+        }
+    }
+
+    override suspend fun autoCompleteLocationHabit(habitId: String) {
+        val habit = habitDao.getHabitById(habitId) ?: return
+        val now = System.currentTimeMillis()
+
+        // Check if already completed today
+        val todayStart = getTodayStartTimestamp()
+        val todayEnd = todayStart + 24 * 60 * 60 * 1000
+        val existingCompletion = completionDao.getCompletionForDay(habitId, todayStart, todayEnd)
+
+        if (existingCompletion == null) {
+            // Create completion record with autoCompleted = true
+            val completion = Completion(
+                id = UUID.randomUUID().toString(),
+                habitId = habitId,
+                completedAt = now,
+                autoCompleted = true
+            )
+            completionDao.insertCompletion(completion)
+
             // Update streak count
             val updatedHabit = habit.copy(
                 streakCount = habit.streakCount + 1,

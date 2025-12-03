@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -195,20 +194,26 @@ class AddEditHabitFragment : Fragment() {
         if (!PermissionHelper.hasLocationPermission(requireContext())) {
             return
         }
-        
+
         try {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
-                        val locationData = LocationData(
-                            latitude = location.latitude,
-                            longitude = location.longitude,
-                            address = getAddressFromLocation(location.latitude, location.longitude)
-                        )
-                        selectedLocation = locationData
-                        binding.tvLocationAddress.text = locationData.address
-                            ?: getString(R.string.location_selected)
-                        updatePreview()
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val address = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                getAddressFromLocation(location.latitude, location.longitude)
+                            }
+
+                            val locationData = LocationData(
+                                latitude = location.latitude,
+                                longitude = location.longitude,
+                                address = address
+                            )
+                            selectedLocation = locationData
+                            binding.tvLocationAddress.text = address
+                                ?: getString(R.string.location_selected)
+                            updatePreview()
+                        }
                     } else {
                         Snackbar.make(
                             binding.root,

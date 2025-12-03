@@ -23,6 +23,9 @@ interface CompletionDao {
     @Query("SELECT * FROM completions WHERE completedAt >= :startTime AND completedAt <= :endTime")
     suspend fun getAllCompletionsInRange(startTime: Long, endTime: Long): List<Completion>
     
+    @Query("SELECT * FROM completions ORDER BY completedAt DESC")
+    suspend fun getAllCompletions(): List<Completion>
+    
     @Query("SELECT * FROM completions WHERE habitId = :habitId AND completedAt >= :dayStart AND completedAt < :dayEnd LIMIT 1")
     suspend fun getCompletionForDay(habitId: String, dayStart: Long, dayEnd: Long): Completion?
     

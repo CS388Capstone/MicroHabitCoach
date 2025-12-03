@@ -28,7 +28,14 @@
     <string name="minutes_suffix">min</string>
     <string name="location">Location</string>
     <string name="pick_location">Pick location</string>
+    <string name="pick_current_location">Use Current Location</string>
+    <string name="enter_address">Enter address</string>
+    <string name="use_address">Use This Address</string>
+    <string name="address_helper_text">Enter a street address or place name</string>
     <string name="no_location_selected">No location selected</string>
+    <string name="or">OR</string>
+    <string name="address_geocoding_error">Could not find location for this address. Please check the address and try again.</string>
+    <string name="address_geocoding_empty">Please enter an address</string>
     <string name="radius_meters">Geofence radius</string>
     <string name="meters_suffix">m</string>
     <string name="preview">Preview</string>
@@ -93,6 +100,7 @@
     <string name="onboarding_icon">Onboarding icon</string>
     <string name="skip_onboarding">Skip Onboarding?</string>
     <string name="skip_onboarding_message">You can always set up permissions later in Settings. Continue anyway?</string>
+    <string name="onboarding_starter_habit_name">Walk 10 minutes</string>
 
     <!-- Onboarding Steps -->
     <string name="onboarding_welcome_title">Welcome to MicroHabit Coach</string>
@@ -204,6 +212,8 @@
     <string name="reset_all_streaks">Reset All Streaks</string>
     <string name="clear_history_confirmation">Are you sure you want to clear all completion history? This action cannot be undone.</string>
     <string name="reset_streaks_confirmation">Are you sure you want to reset all streaks? This action cannot be undone.</string>
+    <string name="reset_onboarding">Reset onboarding (show intro again)</string>
+    <string name="reset_onboarding_confirmation">This will make the intro and onboarding screens show again the next time you open the app. Existing habits will not be deleted.</string>
     <string name="battery_optimization">Battery Optimization</string>
     <string name="battery_optimization_mode">Battery-Friendly Mode</string>
     <string name="battery_optimization_description">Reduces sensor polling and background activity to save battery</string>

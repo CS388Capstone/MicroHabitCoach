@@ -90,7 +90,14 @@ object ReminderScheduler {
         val workManager = WorkManager.getInstance(context)
         
         // Calculate delay until next occurrence
-        val delayMillis = calculateDelayUntilNextReminder(reminderTime, reminderDays)
+        var delayMillis = calculateDelayUntilNextReminder(reminderTime, reminderDays)
+        
+        // Demo-friendly behavior:
+        // If the reminder time is effectively \"now\" (within the next 60 seconds),
+        // show the notification very soon so it can be seen immediately in a demo.
+        if (delayMillis in 0..60_000L) {
+            delayMillis = 5_000L // fire in ~5 seconds
+        }
         
         if (delayMillis < 0) {
             // No valid day found, don't schedule

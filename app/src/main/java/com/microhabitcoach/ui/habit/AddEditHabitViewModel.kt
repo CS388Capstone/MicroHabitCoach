@@ -113,12 +113,30 @@ class AddEditHabitViewModel(
                 // Schedule reminder notifications for time-based habits
                 ReminderScheduler.rescheduleHabitReminders(getApplication(), habit)
                 
-                // Create/update geofence for location-based habits
-                if (habit.type == HabitType.LOCATION && habit.location != null && habit.geofenceRadius != null) {
-                    GeofenceService.addGeofence(application, habit)
-                } else if (existingHabit?.type == HabitType.LOCATION && habit.type != HabitType.LOCATION) {
+                // Handle geofencing for location-based habits
+                when {
+                    // New location-based habit - add geofence
+                    habit.type == HabitType.LOCATION && habit.location != null && habit.geofenceRadius != null 
+                    && existingHabit == null -> {
+                        GeofenceService.addGeofence(getApplication(), habit)
+                    }
+                    // Editing location-based habit - remove old, add new (in case location/radius changed)
+                    habit.type == HabitType.LOCATION && habit.location != null && habit.geofenceRadius != null 
+                    && existingHabit != null -> {
+                        // Always remove old geofence first when editing (handles location/radius changes)
+                        GeofenceService.removeGeofence(getApplication(), habit.id)
+                        // Add updated geofence
+                        GeofenceService.addGeofence(getApplication(), habit)
+                    }
                     // Habit type changed from LOCATION to something else - remove geofence
-                    GeofenceService.removeGeofence(application, habit.id)
+                    existingHabit?.type == HabitType.LOCATION && habit.type != HabitType.LOCATION -> {
+                        GeofenceService.removeGeofence(getApplication(), habit.id)
+                    }
+                    // Location-based habit but missing location or radius - remove geofence
+                    existingHabit?.type == HabitType.LOCATION && 
+                    (habit.location == null || habit.geofenceRadius == null) -> {
+                        GeofenceService.removeGeofence(getApplication(), habit.id)
+                    }
                 }
                 
                 _saveState.value = SaveState.Success
@@ -138,7 +156,7 @@ class AddEditHabitViewModel(
                 ReminderScheduler.cancelHabitReminders(getApplication(), id)
                 
                 // Remove geofence before deleting
-                GeofenceService.removeGeofence(application, id)
+                GeofenceService.removeGeofence(getApplication(), id)
                 
                 repository.deleteHabit(id)
                 _habit.value = null

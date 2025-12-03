@@ -3,6 +3,8 @@ package com.microhabitcoach.notification
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.microhabitcoach.activity.ActivityDurationTracker
+import com.microhabitcoach.data.model.MotionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -36,18 +38,28 @@ class InactivityDetectionWorker(
     }
     
     /**
-     * Checks if user has been inactive.
-     * This is a simplified implementation - in production, you'd track activity transitions
-     * using ActivityTransitionRequest and store the last activity time.
+     * Checks if user has been inactive (stationary) for 30+ minutes.
+     *
+     * Uses ActivityDurationTracker, which is updated by ActivityTransitionReceiver /
+     * ActivityRecognitionService. If the current motion state is STATIONARY and the
+     * tracked duration for \"stationary\" is >= threshold, we trigger an inactivity nudge.
      */
     private suspend fun checkInactivity(): Boolean {
-        // TODO: Implement proper activity tracking with ActivityTransition API
-        // For now, this is a placeholder
-        // In production, you would:
-        // 1. Track activity transitions using ActivityTransitionRequest
-        // 2. Store last activity time in SharedPreferences or database
-        // 3. Check if last activity was STATIONARY and was 2+ hours ago
-        return false
+        // Get current motion state (WALKING, RUNNING, STATIONARY, etc.)
+        val motionState = ActivityDurationTracker.getCurrentMotionState()
+
+        if (motionState != MotionState.STATIONARY) {
+            // User is not stationary; no inactivity nudge needed
+            return false
+        }
+
+        // Get how long they've been stationary (in minutes)
+        val stationaryMinutes = ActivityDurationTracker.getActivityDuration("stationary")
+
+        // Threshold: 30 minutes of being stationary (demo-friendly)
+        val thresholdMinutes = 30L
+
+        return stationaryMinutes >= thresholdMinutes
     }
     
     companion object {

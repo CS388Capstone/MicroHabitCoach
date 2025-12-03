@@ -14,7 +14,11 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.navigation.fragment.navArgs
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -181,6 +185,23 @@ class AddEditHabitFragment : Fragment() {
     }
 
     private fun setupLocationPicker() = with(binding) {
+        // Address input option
+        btnUseAddress.setOnClickListener {
+            val address = etAddress.text?.toString()?.trim()
+            if (address.isNullOrBlank()) {
+                tilAddress.error = getString(R.string.address_geocoding_empty)
+            } else {
+                tilAddress.error = null
+                geocodeAddress(address)
+            }
+        }
+        
+        // Clear address error when user types
+        etAddress.doAfterTextChanged {
+            tilAddress.error = null
+        }
+        
+        // Current location option
         btnPickLocation.setOnClickListener {
             if (PermissionHelper.hasLocationPermission(requireContext())) {
                 getCurrentLocation()
@@ -200,7 +221,7 @@ class AddEditHabitFragment : Fragment() {
                 .addOnSuccessListener { location ->
                     if (location != null) {
                         viewLifecycleOwner.lifecycleScope.launch {
-                            val address = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            val address = withContext(Dispatchers.IO) {
                                 getAddressFromLocation(location.latitude, location.longitude)
                             }
 
@@ -263,6 +284,51 @@ class AddEditHabitFragment : Fragment() {
             null
         } catch (e: IllegalArgumentException) {
             null
+        }
+    }
+    
+    private fun geocodeAddress(addressString: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                binding.tilAddress.error = null
+                
+                val geocoder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Geocoder(requireContext(), Locale.getDefault())
+                } else {
+                    @Suppress("DEPRECATION")
+                    Geocoder(requireContext(), Locale.getDefault())
+                }
+                
+                val addresses = withContext(Dispatchers.IO) {
+                    geocoder.getFromLocationName(addressString, 1)
+                }
+                
+                if (addresses != null && addresses.isNotEmpty()) {
+                    val address = addresses[0]
+                    val locationData = LocationData(
+                        latitude = address.latitude,
+                        longitude = address.longitude,
+                        address = addressString
+                    )
+                    
+                    selectedLocation = locationData
+                    binding.tvLocationAddress.text = addressString
+                    binding.etAddress.clearFocus()
+                    updatePreview()
+                    
+                    Snackbar.make(
+                        binding.root,
+                        R.string.location_selected,
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                } else {
+                    binding.tilAddress.error = getString(R.string.address_geocoding_error)
+                }
+            } catch (e: IOException) {
+                binding.tilAddress.error = getString(R.string.address_geocoding_error)
+            } catch (e: IllegalArgumentException) {
+                binding.tilAddress.error = getString(R.string.address_geocoding_error)
+            }
         }
     }
 
@@ -478,7 +544,14 @@ class AddEditHabitFragment : Fragment() {
         etDuration.setText(habit.targetDuration?.toString() ?: "")
 
         selectedLocation = habit.location
-        tvLocationAddress.text = habit.location?.address ?: getString(R.string.no_location_selected)
+        // Populate address field if location exists
+        if (habit.location != null) {
+            etAddress.setText(habit.location.address ?: "")
+            tvLocationAddress.text = habit.location.address
+                ?: getString(R.string.location_selected)
+        } else {
+            tvLocationAddress.text = getString(R.string.no_location_selected)
+        }
         etRadius.setText(habit.geofenceRadius?.toString() ?: "")
 
         updatePreview()

@@ -9,6 +9,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.microhabitcoach.R
 import com.microhabitcoach.data.database.DatabaseModule
 import com.microhabitcoach.databinding.ActivityMainBinding
+import com.microhabitcoach.activity.ActivityRecognitionService
+import com.microhabitcoach.geofence.GeofenceService
 import com.microhabitcoach.notification.NotificationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,8 +33,14 @@ class MainActivity : AppCompatActivity() {
         // Initialize notification service
         NotificationService.initialize(this)
         
-        // Test database connection
+        // Test database connection and initialize services
         testDatabase()
+        
+        // Sync geofences on app startup
+        syncGeofences()
+        
+        // Initialize Activity Recognition for motion-based habits
+        initializeActivityRecognition()
     }
     
     private fun setupNavigation() {
@@ -93,6 +101,35 @@ class MainActivity : AppCompatActivity() {
                 // Log error but don't crash the app
                 e.printStackTrace()
             }
+        }
+    }
+    
+    /**
+     * Syncs all geofences on app startup.
+     * Ensures all active location-based habits have geofences registered,
+     * and removes geofences for habits that no longer exist or are inactive.
+     */
+    private fun syncGeofences() {
+        activityScope.launch {
+            try {
+                GeofenceService.updateGeofences(applicationContext)
+            } catch (e: Exception) {
+                // Log error but don't crash the app - geofencing is not critical for app launch
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Initializes Activity Recognition service on app startup.
+     * This enables auto-completion for motion-based habits.
+     */
+    private fun initializeActivityRecognition() {
+        try {
+            ActivityRecognitionService.startMonitoring(applicationContext)
+        } catch (e: Exception) {
+            // Log error but don't crash the app - activity recognition requires permissions
+            e.printStackTrace()
         }
     }
 }

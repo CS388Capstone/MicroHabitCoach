@@ -44,8 +44,10 @@ class WeatherRepository {
             return cachedWeather
         }
 
+        android.util.Log.d("WeatherRepository", "Fetching weather for location: $locationKey")
         return try {
             val response = withContext(Dispatchers.IO) {
+                android.util.Log.d("WeatherRepository", "Calling OpenWeather API...")
                 weatherApi.getCurrentWeather(
                     latitude = latitude,
                     longitude = longitude,
@@ -53,16 +55,28 @@ class WeatherRepository {
                     apiKey = apiKey
                 )
             }
+            android.util.Log.d("WeatherRepository", "API response received: weather=${response.weather?.size ?: 0} entries, main.temp=${response.main?.temp}")
+            if (response.weather != null && response.weather.isNotEmpty()) {
+                response.weather.forEachIndexed { index, weather ->
+                    android.util.Log.d("WeatherRepository", "  Weather[$index]: id=${weather.id}, group=${weather.group}, description=${weather.description}")
+                }
+            } else {
+                android.util.Log.w("WeatherRepository", "API response has no weather entries!")
+            }
+            
             val mappedWeather = mapResponseToWeather(response)
             if (mappedWeather != null) {
                 cachedWeather = mappedWeather
                 lastFetchTime = now
                 lastLocationKey = locationKey
-                android.util.Log.d("WeatherRepository", "Fetched weather: $mappedWeather")
+                android.util.Log.d("WeatherRepository", "Successfully mapped weather: condition=${mappedWeather.condition}, temp=${mappedWeather.temperature}°C")
+            } else {
+                android.util.Log.w("WeatherRepository", "Failed to map API response to Weather object - response may be incomplete")
             }
             mappedWeather
         } catch (e: Exception) {
-            android.util.Log.e("WeatherRepository", "Failed to fetch weather: ${e.message}", e)
+            android.util.Log.e("WeatherRepository", "Exception while fetching weather: ${e.javaClass.simpleName}: ${e.message}", e)
+            android.util.Log.e("WeatherRepository", "Stack trace:", e)
             null
         }
     }

@@ -374,20 +374,45 @@ class ExploreViewModel(
         // Get current time
         val currentTime = LocalTime.now()
         
+        android.util.Log.d("ExploreViewModel", "=== BUILDING USER CONTEXT ===")
+        android.util.Log.d("ExploreViewModel", "Checking location permissions...")
+        
         val (currentLocation, hasLocationPermission) = getLastKnownLocation()
+        
+        android.util.Log.d("ExploreViewModel", "Location permission: $hasLocationPermission")
+        if (currentLocation != null) {
+            android.util.Log.d("ExploreViewModel", "Location available: lat=${currentLocation.latitude}, lon=${currentLocation.longitude}, accuracy=${currentLocation.accuracy}m")
+        } else {
+            android.util.Log.w("ExploreViewModel", "Location is NULL - cannot fetch weather")
+        }
         
         // Get recent motion state from ActivityDurationTracker
         ActivityDurationTracker.initialize(getApplication())
         val motionState = ActivityDurationTracker.getCurrentMotionState()
         
+        android.util.Log.d("ExploreViewModel", "Attempting to fetch weather...")
         val currentWeather = if (currentLocation != null) {
-            weatherRepository.getWeather(
-                latitude = currentLocation.latitude,
-                longitude = currentLocation.longitude
-            )
+            try {
+                val weather = weatherRepository.getWeather(
+                    latitude = currentLocation.latitude,
+                    longitude = currentLocation.longitude
+                )
+                if (weather != null) {
+                    android.util.Log.d("ExploreViewModel", "Weather fetched successfully: condition=${weather.condition}, temp=${weather.temperature}°C")
+                } else {
+                    android.util.Log.w("ExploreViewModel", "Weather fetch returned NULL - check WeatherRepository logs for API errors")
+                }
+                weather
+            } catch (e: Exception) {
+                android.util.Log.e("ExploreViewModel", "Exception while fetching weather: ${e.message}", e)
+                null
+            }
         } else {
+            android.util.Log.w("ExploreViewModel", "Skipping weather fetch - no location available")
             null
         }
+        
+        android.util.Log.d("ExploreViewModel", "Final weather state: ${if (currentWeather != null) "available" else "unavailable"}")
         updateWeatherUiState(currentWeather, hasLocationPermission)
         
         return UserContext(
@@ -410,25 +435,35 @@ class ExploreViewModel(
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
+        android.util.Log.d("ExploreViewModel", "Location permissions - FINE: $hasFineLocation, COARSE: $hasCoarseLocation")
+
         if (!hasFineLocation && !hasCoarseLocation) {
-            android.util.Log.d("ExploreViewModel", "Location permission not granted, skipping location/weather fetch.")
+            android.util.Log.w("ExploreViewModel", "No location permissions granted - cannot fetch location or weather")
             return null to false
         }
 
+        android.util.Log.d("ExploreViewModel", "Requesting last known location from FusedLocationClient...")
         return suspendCancellableCoroutine { continuation ->
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
                     if (continuation.isActive) {
+                        if (location != null) {
+                            android.util.Log.d("ExploreViewModel", "Location retrieved successfully: lat=${location.latitude}, lon=${location.longitude}, accuracy=${location.accuracy}m, time=${location.time}")
+                        } else {
+                            android.util.Log.w("ExploreViewModel", "FusedLocationClient returned NULL location - device may not have location fix yet")
+                        }
                         continuation.resume(location to true)
                     }
                 }
                 .addOnFailureListener { exception ->
-                    android.util.Log.e("ExploreViewModel", "Failed to get location: ${exception.message}", exception)
+                    android.util.Log.e("ExploreViewModel", "FusedLocationClient failed to get location: ${exception.message}", exception)
+                    android.util.Log.e("ExploreViewModel", "Exception type: ${exception.javaClass.simpleName}")
                     if (continuation.isActive) {
                         continuation.resume(null to true)
                     }
                 }
                 .addOnCanceledListener {
+                    android.util.Log.w("ExploreViewModel", "Location request was cancelled")
                     if (continuation.isActive) {
                         continuation.resume(null to true)
                     }
@@ -452,21 +487,30 @@ class ExploreViewModel(
 
     private fun updateWeatherUiState(weather: Weather?, hasLocationPermission: Boolean) {
         val context = getApplication<Application>()
+        android.util.Log.d("ExploreViewModel", "=== UPDATING WEATHER UI STATE ===")
+        android.util.Log.d("ExploreViewModel", "hasLocationPermission: $hasLocationPermission, weather: ${if (weather != null) "available (${weather.condition}, ${weather.temperature}°C)" else "null"}")
+        
         val uiState = when {
-            !hasLocationPermission -> WeatherUiState(
-                isAvailable = false,
-                conditionText = context.getString(R.string.weather_unavailable_title),
-                temperatureText = null,
-                impactMessage = context.getString(R.string.weather_permission_message),
-                impactType = WeatherImpactType.NEUTRAL
-            )
-            weather == null -> WeatherUiState(
-                isAvailable = false,
-                conditionText = context.getString(R.string.weather_unavailable_title),
-                temperatureText = null,
-                impactMessage = context.getString(R.string.weather_unavailable_message),
-                impactType = WeatherImpactType.NEUTRAL
-            )
+            !hasLocationPermission -> {
+                android.util.Log.w("ExploreViewModel", "Setting weather UI state: NO PERMISSION")
+                WeatherUiState(
+                    isAvailable = false,
+                    conditionText = context.getString(R.string.weather_unavailable_title),
+                    temperatureText = null,
+                    impactMessage = context.getString(R.string.weather_permission_message),
+                    impactType = WeatherImpactType.NEUTRAL
+                )
+            }
+            weather == null -> {
+                android.util.Log.w("ExploreViewModel", "Setting weather UI state: WEATHER NULL (no permission or fetch failed)")
+                WeatherUiState(
+                    isAvailable = false,
+                    conditionText = context.getString(R.string.weather_unavailable_title),
+                    temperatureText = null,
+                    impactMessage = context.getString(R.string.weather_unavailable_message),
+                    impactType = WeatherImpactType.NEUTRAL
+                )
+            }
             else -> {
                 val conditionLabel = getWeatherConditionLabel(weather, context)
                 val temperatureText = weather.temperature?.let { formatTemperature(context, it) }
@@ -475,6 +519,7 @@ class ExploreViewModel(
                     isBadOutdoorWeather(weather) -> WeatherImpactType.NEGATIVE to context.getString(R.string.weather_negative_message)
                     else -> WeatherImpactType.NEUTRAL to context.getString(R.string.weather_neutral_message)
                 }
+                android.util.Log.d("ExploreViewModel", "Setting weather UI state: AVAILABLE - condition=$conditionLabel, temp=$temperatureText, impact=$impactType")
                 WeatherUiState(
                     isAvailable = true,
                     conditionText = conditionLabel,
@@ -484,6 +529,7 @@ class ExploreViewModel(
                 )
             }
         }
+        android.util.Log.d("ExploreViewModel", "Weather UI state updated: isAvailable=${uiState.isAvailable}, conditionText=${uiState.conditionText}, impactMessage=${uiState.impactMessage}")
         _weatherState.postValue(uiState)
     }
 

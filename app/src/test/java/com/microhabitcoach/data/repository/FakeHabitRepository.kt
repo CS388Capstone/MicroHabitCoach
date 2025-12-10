@@ -35,6 +35,22 @@ class FakeHabitRepository : HabitRepository {
         emitSnapshot()
     }
 
+    override suspend fun autoCompleteLocationHabit(habitId: String) {
+        // For tests, treat as no-op
+    }
+
+    override suspend fun autoCompleteMotionHabit(habitId: String) {
+        // For tests, treat as no-op
+    }
+
+    override suspend fun clearAllCompletions() {
+        // For tests, treat as no-op
+    }
+
+    override suspend fun resetAllStreaks() {
+        // For tests, treat as no-op
+    }
+
     override suspend fun isHabitCompletedToday(habitId: String): Boolean {
         // For tests, always return false (can be customized if needed)
         return false

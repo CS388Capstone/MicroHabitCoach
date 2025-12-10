@@ -15,7 +15,12 @@ import com.microhabitcoach.notification.GeofenceNotificationHandler
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
-        val geofencingEvent = GeofencingEvent.fromIntent(intent)
+        val geofencingEvent = try {
+            geofencingEventProvider(intent)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to parse geofencing event from intent: ${e.message}")
+            null
+        }
         
         if (geofencingEvent?.hasError() == true) {
             val errorMessage = getGeofenceErrorString(geofencingEvent.errorCode)
@@ -65,6 +70,11 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     
     companion object {
         private const val TAG = "GeofenceBroadcastReceiver"
+
+        // Allow tests to inject a safe provider that bypasses real parcelable decoding
+        internal var geofencingEventProvider: (Intent) -> GeofencingEvent? = { intent ->
+            GeofencingEvent.fromIntent(intent)
+        }
     }
 }
 

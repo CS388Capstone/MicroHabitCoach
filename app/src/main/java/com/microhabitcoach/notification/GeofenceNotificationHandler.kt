@@ -3,6 +3,8 @@ package com.microhabitcoach.notification
 import android.content.Context
 import android.util.Log
 import com.microhabitcoach.data.database.DatabaseModule
+import com.microhabitcoach.data.database.dao.CompletionDao
+import com.microhabitcoach.data.database.dao.HabitDao
 import com.microhabitcoach.data.repository.DefaultHabitRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +54,7 @@ object GeofenceNotificationHandler {
                     return@launch
                 }
 
-                val repository = DefaultHabitRepository(habitDao, database.completionDao())
+                val repository = repositoryFactory(habitDao, database.completionDao())
 
                 if (AUTO_COMPLETE_LOCATION_ON_ENTRY) {
                     // Auto-complete the habit instead of (or in addition to) showing a notification
@@ -60,7 +62,7 @@ object GeofenceNotificationHandler {
                     Log.d(TAG, "Auto-completed location habit from geofence: ${habit.name}")
                 } else {
                     // Show notification (default behavior)
-                    val notificationManager = HabitNotificationManager.getInstance(context)
+                    val notificationManager = notificationManagerProvider(context)
                     notificationManager.showGeofenceNotification(habit)
                     Log.d(TAG, "Geofence notification shown for habit: ${habit.name}")
                 }
@@ -69,5 +71,13 @@ object GeofenceNotificationHandler {
             }
         }
     }
+
+    // Allow tests to inject a fake repository factory to avoid real construction
+    internal var repositoryFactory: (HabitDao, CompletionDao) -> DefaultHabitRepository =
+        { habitDao, completionDao -> DefaultHabitRepository(habitDao, completionDao) }
+
+    // Allow tests to inject a fake notification manager
+    internal var notificationManagerProvider: (Context) -> HabitNotificationManager =
+        { ctx -> HabitNotificationManager.getInstance(ctx) }
 }
 

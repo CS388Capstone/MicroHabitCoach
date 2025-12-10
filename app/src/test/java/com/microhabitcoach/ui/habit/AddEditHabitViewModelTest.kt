@@ -8,6 +8,8 @@ import com.microhabitcoach.data.model.LocationData
 import com.microhabitcoach.data.repository.FakeHabitRepository
 import com.microhabitcoach.testing.getOrAwaitValue
 import com.microhabitcoach.testing.MainDispatcherRule
+import io.mockk.every
+import io.mockk.mockkObject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -48,6 +50,12 @@ class AddEditHabitViewModelTest {
 
     @Test
     fun saveHabitPersistsDataAndEmitsSuccess() = runTest {
+        mockkObject(com.microhabitcoach.notification.ReminderScheduler)
+        mockkObject(com.microhabitcoach.geofence.GeofenceService)
+        every { com.microhabitcoach.notification.ReminderScheduler.rescheduleHabitReminders(any(), any()) } returns Unit
+        every { com.microhabitcoach.geofence.GeofenceService.addGeofence(any(), any()) } returns Unit
+        every { com.microhabitcoach.geofence.GeofenceService.removeGeofence(any(), any()) } returns Unit
+
         val repository = FakeHabitRepository()
         val viewModel = AddEditHabitViewModel(application, repository)
 

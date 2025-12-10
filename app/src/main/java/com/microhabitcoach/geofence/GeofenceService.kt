@@ -31,6 +31,8 @@ object GeofenceService {
     
     private var geofencingClient: GeofencingClient? = null
     private var pendingIntent: PendingIntent? = null
+    internal var geofencingClientProvider: (Context) -> GeofencingClient =
+        { ctx -> LocationServices.getGeofencingClient(ctx.applicationContext) }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     // Tracks whether we recently hit the geofence limit so UI can surface a warning.
     @Volatile
@@ -40,9 +42,17 @@ object GeofenceService {
      * Initializes the geofencing client.
      */
     private fun initializeClient(context: Context) {
-        if (geofencingClient == null) {
-            geofencingClient = LocationServices.getGeofencingClient(context.applicationContext)
-        }
+        // Always refresh client from provider to ensure tests can inject a mock
+        geofencingClient = geofencingClientProvider(context)
+    }
+
+    /**
+     * Test-only helper to clear cached state.
+     */
+    internal fun resetForTests() {
+        geofencingClient = null
+        pendingIntent = null
+        lastGeofenceLimitHit = false
     }
     
     /**
